@@ -1,0 +1,19 @@
+[theme] # rearanged order from tutorial to order that makes more sense (to me)
+
+# Background color for the main content area
+backgroundColor = "#E7ECEF" # Anti-flash white
+
+# Background color for sidebar and most interactive widgets
+secondaryBackgroundColor = "#DBD56E" #Straw
+
+# Primary accent for interactive elements
+primaryColor = "#2D93AD" # Blue (Munsell)
+
+
+# Color used for almost all text
+textColor = "#25291C"
+
+# Font family for all text in the app, except code blocks
+# Accepted values (serif | sans serif | monospace) 
+# Default: "sans serif"
+font = "sans-serif"
