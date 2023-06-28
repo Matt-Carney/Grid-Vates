@@ -6,64 +6,86 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy.stats import norm
 
-p = np.arange(0.1,1,.1)
-
-#n_0 = norm.ppf(p, loc=25, scale=4)
-#n_1= norm.ppf(p, loc=25, scale=0.ZZ)
 
 
+unif_bound = norm.ppf([0.136, 0.864], loc=20, scale=1)
+unif_bound[0]
 
-def gen_normal(mu=5, sigma=0.1, num=500):
+def gen_normal(mu=5, sigma=0.1, num=10000):
     return np.random.normal(loc=mu, scale=sigma, size=num)
 
-fig = go.Figure()
-
-fig.add_trace(go.Scatter(x=[1, 2, 3, 4, 5], y=[7, 7, 7, 7, 7], fill='tozeroy', fillcolor='purple',
-                    mode='none', line_shape='spline' # override default markers+lines
-                    ))
-
-fig.add_trace(go.Scatter(x=[1, 2, 3, 4], y=[6, 5, 6, 5], fill='tozeroy', fillcolor='red',
-                    mode= 'none', line_shape='spline'))
-
-fig.add_trace(go.Scatter(x=[1, 2, 3], y=[3, 4, 3], fill='tozeroy', fillcolor='green',
-                    mode='none', line_shape='spline' # override default markers+lines
-                    ))
-fig.add_trace(go.Scatter(x=[1, 2, 3], y=[2, 1, 2], fill='tozeroy', fillcolor='red',
-                    mode='none', line_shape='spline' # override default markers+lines
-                    ))
-fig.add_trace(go.Scatter(x=[1, 2, 3, 4], y=[1, 1, 1, 1], fill='tozeroy', fillcolor='purple',
-                    mode='none', line_shape='spline'  # override default markers+lines
-                    ))
+def gen_uniform(low=0, high=1.0, size=10000):
+    return np.random.uniform(low=low, high=high, size=size)
 
 
-# x = np.array([1, 2, 3, 4, 5])
-# y = np.array([1, 3, 2, 3, 1])
+#def contour_data(sigma=20, time_steps=60, deacay=1.0, size=1000):
+
+mu = 20
+sigma = 5
+time_steps = 60 
+decay = 1.0
+size = 10000
+bins=20
+
+x = np.arange(time_steps)
+z = np.zeros((int(bins), int(time_steps)))
+
+for i in range(time_steps):
+    # Uniform/Normal split
+    decay_per = (i+1)/time_steps
+    num_uniform = int(decay_per*size)
+    num_normal = size - num_uniform
+
+    # Gernerate data
+    norm_ = gen_normal(mu, sigma, num_normal)
+    unif_bound = norm.ppf([0.01, 0.999], loc=mu, scale=sigma) # Set uniform distribution to 95th
+    unif = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
+
+    samples = list(norm_) + list(unif)
+
+
+    # Determine y values of bins
+    if i == 0: 
+        hist = np.histogram(samples, bins)
+        y_out = hist[1][:-1] # Need to remove last bin edge
+        y = hist[1]
+        z_temp = hist[0]/len(samples)
+        #z_temp = z_temp.reshape(z_temp.shape[0],1)
+
+    # Apply y values
+    else:
+        hist = np.histogram(samples, bins = y)
+        z_temp = hist[0]/len(samples)
+        #z_temp = z_temp.reshape(z_temp.shape[0],1)
+
+    z[:,i] = z_temp
+
+
+fig3 = go.Figure(data =
+     go.Contour(x = x, y = y, z = z,
+               colorscale='jet'
+               ))
+#fig2.update_layout(xaxis_range=[1,1.2])
+fig3.update_layout(yaxis_range=[0, 40])
+st.plotly_chart(fig3)
 
 
 
-# fig = go.Figure()
+for i in range(10):
+    if i == 0:
+        y = 14
+        print('do something')
+    else:
+        print(y)
 
-# fig.add_trace(go.Scatter(x=x, y=y + 5, name="spline",fill='tozeroy', fillcolor='purple',
-#                     #text=["tweak line smoothness<br>with 'smoothing' in line object"],
-#                     #hoverinfo='text+name',
-#                     line_shape='spline'))
-
-
-
-
-
-
-
-
-st.plotly_chart(fig)
-
-
-
-y_1 = gen_normal(sigma=0.5, num = 10000)
+#y_1 = gen_normal(sigma=0.1, num = 10000)
+y_1 = gen_uniform(4, 6, 10000)
 x_1 = [1 for x in range(len(y_1))]
-y_2 = gen_normal(mu=5.1, sigma=0.5,num=10000)
+#y_2 = gen_normal(mu=5.1, sigma=0.3,num=10000)
+y_2 = gen_uniform(4, 6, 10000)
 x_2 = [1.1 for x in range(len(y_1))]
-y_3 = gen_normal(mu=5,sigma=0.5, num=10000)
+#y_3 = gen_normal(mu=5,sigma=0.5, num=10000)
+y_3 = gen_uniform(4, 6, 10000)
 x_3 = [1.2 for x in range(len(y_1))]
 y = np.array([y_1, y_2, y_3]).flatten('F')
 x = np.array([x_1, x_2, x_3]).flatten('F')
@@ -71,16 +93,47 @@ df = pd.DataFrame({'y': y, 'x': x})
 #fig = px.density_contour(df, x="x", y="y")
 #fig.update_traces(contours_coloring="fill", contours_showlabels = True)
 
-len(x)
+
+
+#hist = np.histogram(y)
+#hist[0]/len(y)
+#hist[1]
+
+
 fig = go.Figure(go.Histogram2dContour(
         x = x,
         y = y,
-        colorscale = 'jet'
+        colorscale = 'jet',
         ))
 fig.update_layout(xaxis_range=[1,1.2])
 st.plotly_chart(fig)
 
+hist_1 = np.histogram(y_1, bins=20)
+z_1 = hist_1[0]/len(y_1)
+y__1 = hist_1[1]
 
+hist_2 = np.histogram(y_2, bins=y__1)
+z_2 = hist_2[0]/len(y_2)
+y__2 = hist_2[1]
+
+hist_3 = np.histogram(y_3, bins=y__1)
+z_3 = hist_3[0]/len(y_3)
+y__3 = hist_3[1]
+
+x = [1, 2, 3]
+
+zz = np.array([z_1, z_2, z_3])
+zzT = zz.T
+
+zzT.shape
+
+fig2 = go.Figure(data =
+     go.Contour(x = x, y = y__1, z = zzT,
+               colorscale='jet'
+               ))
+#fig2.update_layout(xaxis_range=[1,1.2])
+#fig2.update_layout(yaxis_range=[4.96, 5.03])
+st.plotly_chart(fig2)
 
 
 
