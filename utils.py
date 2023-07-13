@@ -8,30 +8,82 @@ high = 30
 low = 20
 amp = (high-low)/2
 ave = (high+low)/2
-len(t)
-t = np.arange(3, 27)
-vals = np.sin(t) * amp + ave
+# t = np.arange(3, 27)
+# vals = np.sin(t) * amp + ave
 
-fig, ax = plt.subplots()
-ax.plot(t, vals, 'green')
-plt.show()
-plt.close()
-vals
+# fig, ax = plt.subplots()
+# ax.plot(t, vals, 'green')
+# plt.show()
+# plt.close()
+# vals
 
-len(t)
-len(vals)
+p = np.pi*2
+p
+np.sin(2*np.pi)
+np.sin(p)
+np.sin(6.3)
 
-time = np.arange(0., 10., 0.2)
-velocity = np.sin(time) * 10
-distance = np.zeros_like(time, dtype=float)
+
+len(np.arange(0, 10*np.pi))
+time = np.arange(0., 10*np.pi, .1)
+vals = np.sin(time) #* 10
+#distance = np.zeros_like(time, dtype=float)
 
 fig, ax = plt.subplots()
 #ax1.set_ylabel("distance (m)")
 #ax1.set_xlabel("time")
-ax.plot(t, vals, "blue")
+ax.plot(time, vals, "green")
 
 plt.show()
 
+
+
+def contour_data(mu = 20, sigma=3, time_steps=60, deacay=1.0, size=10000, bins=20, is_sin = False):
+    x = np.arange(time_steps)
+    z = np.zeros((int(bins), int(time_steps)))
+
+
+    if is_sin == True:
+        high = mu+10
+        low = mu-10
+        amp = (high-low)/2
+        ave = (high+low)/2
+        t = np.arange(time_steps)
+        vals = np.sin(t) * amp + ave
+
+    for i in range(time_steps):
+        if is_sin == True:
+            mu = vals[i]
+        # Uniform/Normal split
+        decay_per = (i+1)/time_steps
+        num_uniform = int(decay_per*size)
+        num_normal = size - num_uniform
+
+        # Gernerate data
+        norm_ = gen_normal(mu, sigma, num_normal)
+        unif_bound = norm.ppf([0.01, 0.999], loc=mu, scale=sigma) # Set uniform distribution to 95th
+        unif = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
+
+        samples = list(norm_) + list(unif)
+
+
+        # Determine y values of bins
+        if i == 0: 
+            hist = np.histogram(samples, bins)
+            y_out = hist[1][:-1] # Need to remove last bin edge
+            y = hist[1]
+            z_temp = hist[0]/len(samples)
+            #z_temp = z_temp.reshape(z_temp.shape[0],1)
+
+        # Apply y values
+        else:
+            hist = np.histogram(samples, bins = y)
+            z_temp = hist[0]/len(samples)
+            #z_temp = z_temp.reshape(z_temp.shape[0],1)
+
+        z[:,i] = z_temp
+    
+    return x, y, z
 
 
 
@@ -138,10 +190,10 @@ class DLR:
     def ampacity(self):
         u_f, p_f, k_f = self.fluid_propertires() # fluid properties
         K_ang = self.wind_direction_factor() # Wind direction factor
-        q_c = self.convection_heat_loss(p_f, u_f, k_f, K_ang)
-        q_r = self.radiated_heat_loss()
-        q_s = self.solar_heat_gain()
-        R_Tc = self.resistance()
+        q_c = self.convection_heat_loss(p_f, u_f, k_f, K_ang) # loss due to convection
+        q_r = self.radiated_heat_loss() # radiated loss
+        q_s = self.solar_heat_gain() # head gain from the sun
+        R_Tc = self.resistance() # AC resistance 
 
         I = math.sqrt((q_c + q_r - q_s)/R_Tc)
 
@@ -149,10 +201,15 @@ class DLR:
         
 
 
-a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
+a = DLR(wind_speed=10, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
+a.ampacity()
+
+
+
+
 d = []
 for i in range(1000):
     a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
     d.append(a.ampacity())
 
-a.ampacity()
+

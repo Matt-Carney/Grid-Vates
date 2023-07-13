@@ -2,31 +2,29 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+
+st.title('Welcom to Grid Vātēs!')
+
+#t_line = Image.open('t_line.png')
+#st.image(t_line)
 
 
-st.title('Dynamic Line Rating Explorer')
+phil = Image.open('phil.png')
+st.image(phil)
 
 
-#np.random.seed(123)
-mean = st.slider('mean', 0, 10, 5)
-variance = st.slider('variance', 0.0, 5.0, .1)
+st.subheader('Benefits of DLR')
+st.markdown('This is some text')
+
+st.subheader('Probabilistic Weather - Sensitivity')
+st.markdown('This is some text')
+
+st.subheader('Probabilistic Weather - Scenarios')
+st.markdown('This is some text')
+
+st.subheader('References')
+st.markdown('This is some text')
 
 
-def gen_normal(mu=5, sigma=0.1, num=500):
-    return np.random.normal(loc=mu, scale=sigma, size=num)
-
-norm = gen_normal(mu=mean, sigma=variance)
-
-st.write('Slider va', mean)
-
-new_val = mean + 5
-
-st.write('new value', norm.mean())
-
-st.subheader('Temperature Forecast')
-fig, ax = plt.subplots()
-ax.hist(norm, bins=20)
-#hist_values = np.histogram(data[DATE_COLUMN].dt.hour, bins=24, range=(0,24))[0]
-#plt.hist(norm)
-st.pyplot(fig)
 
