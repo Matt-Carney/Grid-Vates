@@ -37,6 +37,20 @@ ax.plot(time, vals, "green")
 plt.show()
 
 
+def temp_data(mu=20, delta=2, steps=10):
+    high = mu + delta
+    low = mu - delta
+    amp = (high-low)/2
+    ave = (high+low)/2
+    temp = np.sin(steps) * amp + ave
+    return temp
+
+def gen_uniform(low=0, high=1.0, size=10000):
+    return np.random.uniform(low=low, high=high, size=size)
+
+def gen_normal(mu=5, sigma=0.1, num=10000):
+    return np.random.normal(loc=mu, scale=sigma, size=num)
+
 
 def contour_data(mu = 20, sigma=3, time_steps=60, deacay=1.0, size=10000, bins=20, is_sin = False):
     x = np.arange(time_steps)
@@ -192,7 +206,7 @@ class DLR:
         K_ang = self.wind_direction_factor() # Wind direction factor
         q_c = self.convection_heat_loss(p_f, u_f, k_f, K_ang) # loss due to convection
         q_r = self.radiated_heat_loss() # radiated loss
-        q_s = self.solar_heat_gain() # head gain from the sun
+        q_s = self.solar_heat_gain() # heat gain from the sun
         R_Tc = self.resistance() # AC resistance 
 
         I = math.sqrt((q_c + q_r - q_s)/R_Tc)

@@ -6,9 +6,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
+from utils import DLR, temp_data, gen_normal, gen_uniform
 
 st.title('Probabilistic Weather - Sensitivity')
-st.markdown('This is some text')
+#st.markdown('This is some text')
 
 #unif_bound = norm.ppf([0.136, 0.864], loc=20, scale=1)
 #unif_bound[0]
@@ -20,29 +21,25 @@ def gen_uniform(low=0, high=1.0, size=10000):
     return np.random.uniform(low=low, high=high, size=size)
 
 
+def contour_data(mu = 20, sigma=1, time_fraction=(1/4), deacay=1.0, size=1000, bins=10, type = 'sine'):
+    #x = np.arange(time_steps)
+    x = np.arange(0., 10*np.pi, time_fraction)    
+    time_steps = int(len(x))
+    #z = np.zeros((int(bins), time_steps))
+
+    dists = np.zeros((size, int(time_steps))) 
 
 
-
-def contour_data(mu = 20, sigma=3, time_steps=60, deacay=1.0, size=10000, bins=10, is_sin = False):
-    x = np.arange(time_steps)
-    z = np.zeros((int(bins), int(time_steps)))
-
-
-    if is_sin == True:
+    if type == 'sine':
         high = mu+3
         low = mu-3
         amp = (high-low)/2
         ave = (high+low)/2
-        x = np.arange(0., 14*np.pi, (1/3))
         vals = np.sin(x) * amp + ave
-
-        time_steps = int(len(x))
-        z = np.zeros((int(bins), time_steps))
-
 
 
     for i in range(time_steps):
-        if is_sin == True:
+        if type == 'sine':
             mu = vals[i]
         # Uniform/Normal split
         decay_per = (i+1)/time_steps
@@ -51,32 +48,37 @@ def contour_data(mu = 20, sigma=3, time_steps=60, deacay=1.0, size=10000, bins=1
 
         # Gernerate data
         norm_ = gen_normal(mu, sigma, num_normal)
-        unif_bound = norm.ppf([0.01, 0.999], loc=mu, scale=sigma) # Set uniform distribution to 95th
+        unif_bound = norm.ppf([0.1, 0.99], loc=mu, scale=sigma) # Set uniform distribution to 1 and 99th percentile
         unif = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
 
         samples = list(norm_) + list(unif)
+        dists[:,i] = samples 
 
 
-        # Determine y values of bins
-        if i == 0: 
-            hist = np.histogram(samples, bins)
-            ###y_out = hist[1][:-1] # Need to remove last bin edge
-            y = hist[1]
-            #y = np.array([15, 20, 25, 30, 35, 40])
-            z_temp = hist[0]/len(samples)
-            #z_temp = z_temp.reshape(z_temp.shape[0],1)
+    _1, _99 = np.percentile(dists, [1, 99], axis=0)
+    min = _1.min()
+    max = _99.max()
+    ext = (max+min)/bins
+    #min = min - ext
+    #max = max + ext
 
-        # Apply y values
-        else:
-            hist = np.histogram(samples, bins = y)
-            z_temp = hist[0]/len(samples)
-            #z_temp = z_temp.reshape(z_temp.shape[0],1)
+    bin_val = list(np.linspace(min, max, bins)) # creates list of len(bins), actual bins are bins-1
+    ext_val = bin_val[-1] + ext
+    bin_val.append(ext_val)
 
-        z[:,i] = z_temp
+    y = bin_val
+    z = np.zeros(((bins), time_steps)) 
+
+    # For every distribution, create histogram, replate z_init
+    for i in range(z.shape[1]):
+        hist = np.histogram(dists[:,i], bins=bin_val) # dists = (10000, 132)
+        #hist = hist/num_bins
+        z[:,i] = hist[0]/(len(samples))
+
     
     z = z.round(decimals=2)*2
     
-    return x, y, z
+    return x, y, z, dists
 
 with st.sidebar:
     st.write("Wind Velocity Variables")
@@ -92,75 +94,95 @@ scale_dict = contours=dict(
                 end=.9,
                 size=.1)
 
-left, middle, right = st.columns((1, 20, 1))
 
-color_names = ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100']
-
-my_colorsc=[[0.0, 'rgb(221, 236, 239)'],
-            #[0.0, 'rgb(221, 236, 239'], 
-            [0.1, 'rgb(60, 90, 205)'],
-            #[0.2, 'rgb(60, 90, 205)'],
+my_colorsc=[[0.0, 'rgb(231, 236, 239)'],
+            #[0.1, 'rgb(60, 90, 205)'],
+            [0.1, 'rgb(70, 107, 227)'],
             [0.2, 'rgb(62, 155, 254)'],
-            #[0.3, 'rgb(65, 148, 254)'],
             [0.3, 'rgb(24, 214, 203)'], 
-            #[0.4, 'rgb(29, 204, 217)'],
             [0.4, 'rgb(70, 247, 131)'],
-            #[0.5, 'rgb(45, 240, 156)'],
             [0.5, 'rgb(162, 252, 60)'],
-            #[0.6, 'rgb(129, 254, 82)'],
             [0.6, 'rgb(225, 220, 55)'], 
-            #[0.7, 'rgb(195, 240, 51)'],
             [0.7, 'rgb(253, 165, 49)'],
-            #[0.8, 'rgb(242, 200, 58)'], 
             [0.8, 'rgb(239, 90, 17)'], 
-            #[0.9, 'rgb(253, 143, 40)'],
             [0.9, 'rgb(196, 37, 2)'],
             [1, 'rgb(122, 4, 2)']]
 
-turbo = ['rgb(255, 255, 255)', 'rgb(68, 90, 205)', 'rgb(57, 163, 251)', 'rgb(24, 225, 187)', 'rgb(107, 253, 99)', 'rgb(195, 240, 51)', 'rgb(249, 188, 57)', 'rgb(246, 108, 25)', 'rgb(203, 42, 3)', 'rgb(122, 4, 2)']
+line_param = {'width': 0}
+contour_param = {'start': 0.1, 'end': .9, 'size': .1}
+
 # DLR Forecast
 #st.subheader('DLR Forecast')
-x_DLR, y_DLR, z_DLR = contour_data(mu = 25, sigma=2, is_sin=True)
-#z_DLR = z_DLR.round(decimals=2)*2
-#z1 = z1*2
-fig_DLR = go.Figure(data =
-     go.Contour(x = x_DLR, y = y_DLR, z = z_DLR,
-               colorscale=my_colorsc, contours=scale_dict))
-#fig2.update_layout(xaxis_range=[1,1.2])
-fig_DLR.update_layout(yaxis_range=[0, 40], title_text="DLR Forecast")
-#with middle:
-st.plotly_chart(fig_DLR, use_container_width=True)
+#x_DLR, y_DLR, z_DLR, d_DLR = contour_data(mu = 25, sigma=1, type='sine')
+
+#fig_DLR = go.Figure(data =
+#     go.Contour(x = x_DLR, y = y_DLR, z = z_DLR,
+#               colorscale=my_colorsc, contours = contour_param, hoverinfo='skip', connectgaps=True))
+
+#fig_DLR.update_layout(height=450, width=900,yaxis_range=[0, 40], title_text="DLR Forecast")
+#st.plotly_chart(fig_DLR)
 
 
 
 #st.subheader('Environmental Forecast')
-
 # Wind Velocity
-x_vel, y_vel, z_vel = contour_data(mu=vel_mean, sigma=vel_sd, is_sin=True)
+x_vel, y_vel, z_vel, d_vel = contour_data(mu=vel_mean, sigma=vel_sd, type='sine')
 
 # Wind Direction
-x_dir, y_dir, z_dir = contour_data(mu=15, sigma=1, is_sin=True)
+x_dir, y_dir, z_dir, d_dir = contour_data(mu=10, sigma=.5, type='sine')
 
 # Temperature
-x_temp, y_temp, z_temp = contour_data(mu=10, sigma=1, is_sin=True)
+x_temp, y_temp, z_temp, d_temp = contour_data(mu=10, sigma=1, type='sine')
 
 # Solar Irradiance
-x_irr, y_irr, z_irr = contour_data(mu=12, sigma=1, is_sin=True)
+x_irr, y_irr, z_irr, d_irr = contour_data(mu=1000, sigma=20, type='sine')
+
+#d_vel.shape
+#x_vel.shape[0]
+
+num_rand = 100
+x_DLR_ = []
+y_DLR_ = []
+for i, val in enumerate(x_vel):
+    rand_vel = np.random.choice(d_vel[i], replace=True, size=num_rand)
+    rand_dir = np.random.choice(d_dir[i], replace=True, size=num_rand)
+    rand_temp = np.random.choice(d_temp[i], replace=True, size=num_rand)
+    rand_irr = np.random.choice(d_irr[i], replace=True, size=num_rand)
+    x_ = [val for n in range(num_rand)]
+    x_DLR_ = x_DLR_ + x_ 
+    for j, val_2 in enumerate(rand_vel):
+        _dlr = DLR(wind_speed=rand_vel[j], wind_angle=rand_dir[j], ambient_temp=rand_temp[j], eff_rad_heat_flux=rand_irr[j])
+        y_DLR_.append(_dlr.ampacity())
+
+
+
+fig_DLR = go.Figure(go.Histogram2dContour(
+        x = x_DLR_,
+        y = y_DLR_,
+        histnorm='percent',
+        colorscale = my_colorsc
+        #contours = contour_param
+        #autobinx=False,
+        #xbins= dict(size= 0.3),
+        #autobiny=False,
+        #ybins= dict(size = 0.3)
+        ))
+fig_DLR.update_layout(height=450, width=900,yaxis_range=[0, 3000], title_text="DLR Forecast")
+st.plotly_chart(fig_DLR)
 
 
 fig_env = make_subplots(
-    rows=2, cols=2,
+    rows=4, cols=1, shared_xaxes=True,
     subplot_titles=('Wind Velocity', 'Wind Direction', 'Temperature', 'Solar Irradiance'))
 
-fig_env.add_trace(go.Contour(x = x_vel, y = y_vel, z = z_vel, colorscale=my_colorsc, contours=scale_dict, showscale=False), row=1, col=1)
-fig_env.add_trace(go.Contour(x = x_dir, y = y_dir, z = z_dir, colorscale=my_colorsc, contours=scale_dict, showscale=False), row=1, col=2)
-fig_env.add_trace(go.Contour(x = x_temp, y = y_temp, z = z_temp, colorscale=my_colorsc, contours=scale_dict, showscale=False), row=2, col=1)
-fig_env.add_trace(go.Contour(x = x_irr, y = y_irr, z = z_irr, colorscale=my_colorsc, contours=scale_dict, showscale=True), row=2, col=2)
+fig_env.add_trace(go.Contour(x = x_vel, y = y_vel, z = z_vel, colorscale=my_colorsc, contours = contour_param, hoverinfo='skip', showscale=False), row=1, col=1)
+fig_env.add_trace(go.Contour(x = x_dir, y = y_dir, z = z_dir, colorscale=my_colorsc, contours = contour_param, hoverinfo='skip', showscale=False), row=2, col=1)
+fig_env.add_trace(go.Contour(x = x_temp, y = y_temp, z = z_temp, colorscale=my_colorsc, contours = contour_param, hoverinfo='skip', showscale=False), row=3, col=1)
+fig_env.add_trace(go.Contour(x = x_irr, y = y_irr, z = z_irr, colorscale=my_colorsc, contours = contour_param, hoverinfo='skip', showscale=True), row=4, col=1)
 
 fig_env.update_layout(height=700, width=900,
                   title_text="Environmental Forecasts")
 
 st.plotly_chart(fig_env)
-
 
 

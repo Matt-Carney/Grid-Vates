@@ -1,4 +1,68 @@
+import streamlit as st
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from scipy.stats import norm
+
+
+def gen_normal(mu=5, sigma=0.1, num=10000):
+    return np.random.normal(loc=mu, scale=sigma, size=num)
+
+def gen_uniform(low=0, high=1.0, size=10000):
+    return np.random.uniform(low=low, high=high, size=size)
+
+
+mu = 20
+sigma = 1
+size=1000
+x
+x[1]
+x = np.arange(0., 5*np.pi, (1/24))
+len(x)
+high = mu+3
+low = mu-3
+amp = (high-low)/2
+ave = (high+low)/2
+vals = np.sin(x) * amp + ave
+
+len(vals)
+time_steps = int(len(x))
+
+
+df = pd.DataFrame(columns=['x', 'y'])
+
+for i in range(time_steps):
+        decay_per = (i+1)/time_steps
+        num_uniform = int(decay_per*size)
+        num_normal = size - num_uniform
+
+        # Gernerate data
+        mu = vals[i]
+        norm_ = gen_normal(mu, sigma, num_normal)
+        unif_bound = norm.ppf([0.1, 0.99], loc=mu, scale=sigma) # Set uniform distribution to 95th
+        unif = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
+
+        samples = list(norm_) + list(unif)
+
+        t = [x[i] for j in range(size)]
+
+        df_temp = pd.DataFrame({'x': t, 'y': samples})
+
+        df = pd.concat([df, df_temp])        
+
+
+df
+
+
+
+
+
+
+
+
 # Copyright 2019 Google LLC.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -38,4 +102,9 @@ for i in np.linspace(0.1, 1, 10):
 
 len(turbo_rgb)
 turbo_rgb
-np.linspace(0.1, 1, 10)
+
+a = np.linspace(1, 10, 5)
+a
+11/5
+v = np.zeros([len(a)])
+list(v)
