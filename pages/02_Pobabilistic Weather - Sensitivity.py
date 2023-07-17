@@ -21,7 +21,7 @@ def gen_uniform(low=0, high=1.0, size=10000):
     return np.random.uniform(low=low, high=high, size=size)
 
 
-def contour_data(mu = 20, sigma=1, time_fraction=(1/4), deacay=1.0, size=1000, bins=10, type = 'sine'):
+def contour_data(mu = 20, sigma=1, time_fraction=(1/24), deacay=1.0, size=1000, bins=10, type = 'sine'):
     #x = np.arange(time_steps)
     x = np.arange(0., 10*np.pi, time_fraction)    
     time_steps = int(len(x))
@@ -37,9 +37,13 @@ def contour_data(mu = 20, sigma=1, time_fraction=(1/4), deacay=1.0, size=1000, b
         ave = (high+low)/2
         vals = np.sin(x) * amp + ave
 
+    elif type == 'radial':
+        vals = [mu for x in range(time_steps)]
 
     for i in range(time_steps):
         if type == 'sine':
+            mu = vals[i]
+        elif type == 'linear':
             mu = vals[i]
         # Uniform/Normal split
         decay_per = (i+1)/time_steps
@@ -47,7 +51,14 @@ def contour_data(mu = 20, sigma=1, time_fraction=(1/4), deacay=1.0, size=1000, b
         num_normal = size - num_uniform
 
         # Gernerate data
-        norm_ = gen_normal(mu, sigma, num_normal)
+        if type == 'sine':
+            norm_ = gen_normal(mu, sigma, num_normal)
+        elif type == 'radial':
+            norm_ = gen_normal(mu, sigma, num_normal)
+            #norm_ = np.random.vonmises(mu, sigma, num_normal)
+            norm_ = abs(norm_)
+
+        
         unif_bound = norm.ppf([0.1, 0.99], loc=mu, scale=sigma) # Set uniform distribution to 1 and 99th percentile
         unif = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
 
@@ -80,12 +91,31 @@ def contour_data(mu = 20, sigma=1, time_fraction=(1/4), deacay=1.0, size=1000, b
     
     return x, y, z, dists
 
+### Sidebar
+# Wind Velocity
 with st.sidebar:
-    st.write("Wind Velocity Variables")
+    st.write("Wind Velocity Variables (m/s)")
+vel_mean = st.sidebar.slider('Velocity', 1, 20, 9)
+vel_sd = st.sidebar.slider('Velocity Init. Standard Deviation', 0.1, 5.0, 2.0)
 
-# Sidebar
-vel_mean = st.sidebar.slider('Velocity', 24, 30, 27)
-vel_sd = st.sidebar.slider('Init. Standard Deviation', 0.1, 5.0, 2.0)
+# Wind Direction
+with st.sidebar:
+    st.write("Wind Direction Variables (deg)")
+dir_mean = st.sidebar.slider('Angle', 1, 90, 45)
+dir_sd = st.sidebar.slider('Angle Init. Standard Deviation', 0.1, 5.0, 2.0)
+
+# Wind Direction
+with st.sidebar:
+    st.write("Temperature Variables")
+temp_mean = st.sidebar.slider('Degrees (C)', 1, 50, 15)
+temp_sd = st.sidebar.slider('Deg Init. Standard Deviation', 0.1, 5.0, 2.0)
+
+
+# Solar Irradiance
+with st.sidebar:
+    st.write("Solar Irradiance Variables")
+irr_mean = st.sidebar.slider('Heat Flux (W)', 0, 3000, 1500)
+irr_sd = st.sidebar.slider('Irradiance Init. Standard Deviation', 0.1, 5.0, 2.0)
 
 
 # Contour scale dict
@@ -129,13 +159,13 @@ contour_param = {'start': 0.1, 'end': .9, 'size': .1}
 x_vel, y_vel, z_vel, d_vel = contour_data(mu=vel_mean, sigma=vel_sd, type='sine')
 
 # Wind Direction
-x_dir, y_dir, z_dir, d_dir = contour_data(mu=10, sigma=.5, type='sine')
+x_dir, y_dir, z_dir, d_dir = contour_data(mu=dir_mean, sigma=dir_sd, type='radial')
 
 # Temperature
-x_temp, y_temp, z_temp, d_temp = contour_data(mu=10, sigma=1, type='sine')
+x_temp, y_temp, z_temp, d_temp = contour_data(mu=temp_mean, sigma=temp_sd, type='sine')
 
 # Solar Irradiance
-x_irr, y_irr, z_irr, d_irr = contour_data(mu=1000, sigma=20, type='sine')
+x_irr, y_irr, z_irr, d_irr = contour_data(mu=irr_mean, sigma=irr_sd, type='sine')
 
 #d_vel.shape
 #x_vel.shape[0]
@@ -160,14 +190,14 @@ fig_DLR = go.Figure(go.Histogram2dContour(
         x = x_DLR_,
         y = y_DLR_,
         histnorm='percent',
-        colorscale = my_colorsc
-        #contours = contour_param
+        colorscale = my_colorsc,
+        contours = contour_param
         #autobinx=False,
         #xbins= dict(size= 0.3),
         #autobiny=False,
         #ybins= dict(size = 0.3)
         ))
-fig_DLR.update_layout(height=450, width=900,yaxis_range=[0, 3000], title_text="DLR Forecast")
+fig_DLR.update_layout(height=450, width=900,yaxis_range=[0, 5000], title_text="DLR Forecast")
 st.plotly_chart(fig_DLR)
 
 
@@ -181,7 +211,12 @@ fig_env.add_trace(go.Contour(x = x_temp, y = y_temp, z = z_temp, colorscale=my_c
 fig_env.add_trace(go.Contour(x = x_irr, y = y_irr, z = z_irr, colorscale=my_colorsc, contours = contour_param, hoverinfo='skip', showscale=True), row=4, col=1)
 
 fig_env.update_layout(height=700, width=900,
-                  title_text="Environmental Forecasts")
+                  title_text="Environmental Forecasts",
+                  yaxis_range=[0,30], yaxis_title='Velocity (m/s)',
+                  yaxis2_range=[0,90],yaxis2_title='Angle (deg)',
+                  yaxis3_range=[-20,60], yaxis3_title='Degrees (C)',
+                  yaxis4_title='Heat Flux (W)') #yaxis4_range=[0,3000], 
+
 
 st.plotly_chart(fig_env)
 
