@@ -7,6 +7,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
 
+#def radial():
+t = np.random.vonmises(45, 1, 10)
+abs(t)
 
 def gen_normal(mu=5, sigma=0.1, num=10000):
     return np.random.normal(loc=mu, scale=sigma, size=num)
@@ -14,7 +17,11 @@ def gen_normal(mu=5, sigma=0.1, num=10000):
 def gen_uniform(low=0, high=1.0, size=10000):
     return np.random.uniform(low=low, high=high, size=size)
 
+a = gen_normal(mu=0, sigma=1)
+np.percentile(a, [15])
 
+
+ß
 mu = 20
 sigma = 1
 size=1000

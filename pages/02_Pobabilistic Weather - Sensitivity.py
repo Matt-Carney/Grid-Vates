@@ -50,6 +50,9 @@ def contour_data(mu = 20, sigma=1, time_fraction=(1/24), deacay=1.0, size=1000, 
         num_uniform = int(decay_per*size)
         num_normal = size - num_uniform
 
+        #num_normal = size
+        #num_uniform = 0
+
         # Gernerate data
         if type == 'sine':
             norm_ = gen_normal(mu, sigma, num_normal)
