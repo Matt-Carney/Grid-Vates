@@ -6,14 +6,35 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
-from utils import DLR, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, wind_velocity_data
+from utils import DLR, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
 
 st.title('Probabilistic Weather - Sensitivity')
 #st.markdown('This is some text')
 
+t_text = ['Day 0 00:00',
+          'Day 0 12:00',
+          'Day 1 00:00',
+          'Day 1 12:00',
+          'Day 2 00:00',
+          'Day 2 12:00',
+          'Day 3 00:00',
+          'Day 3 12:00',
+          'Day 4 00:00',
+          'Day 4 12:00',
+          'Day 5 00:00']
+
+
+
+
 
 
 ### Sidebar Sliders
+# Temperature
+with st.sidebar:
+    st.write("Temperature Variables")
+temp_decay = st.sidebar.slider('Temperature Temporal Decay', 0.0, 1.0, 1.0)
+temp_mean = st.sidebar.slider('Degrees (C)', 1, 50, 15)
+temp_sd = st.sidebar.slider('Deg Init. Standard Deviation', 0.1, 5.0, 2.0)
 
 # Solar Irradiance
 with st.sidebar:
@@ -35,6 +56,36 @@ with st.sidebar:
 dir_decay = st.sidebar.slider('Wind Dir. Temporal Decay', 0.0, 1.0, 1.0)
 dir_deg = st.sidebar.slider('Degrees From Transmission Line Axis', 0, 360, 45)
 dir_kap = st.sidebar.slider('Kappa', 0.5, 10.0, 2.0)
+
+
+### Temperature
+# Generate Data
+d_temp, t = velocity_temp__data(mu=temp_mean, sigma=temp_sd, decay=temp_decay, type='temp')
+t_new = t*1000
+d_new = d_temp.reshape(-1)
+
+# Plot
+fig_temp = go.Figure(go.Histogram2d(
+        x = t_new,
+        y = d_new,
+        histnorm='percent',
+        colorscale='turbo',
+        autobinx=False,
+        xbins= dict(size= .264),
+        autobiny=False,
+        ybins= dict(size = .264)
+        ))
+
+
+fig_temp.update_xaxes(tickangle=-90,
+                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                  ticktext = t_text
+                  )
+fig_temp.update_layout(height=400, width=900, title_text="Temperature")
+st.plotly_chart(fig_temp)
+
+
+
 
 
 ### Solar Irradiance
@@ -68,11 +119,18 @@ fig_sol = go.Figure(go.Histogram2d(
 
 fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance")
 
+fig_sol.update_xaxes(tickangle=-90,
+                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                  ticktext = t_text
+                  )
+
+
+
 st.plotly_chart(fig_sol)
 
 ### Wind Velocity
 # Generate Data
-d_vel, t = wind_velocity_data(mu=vel_mean, sigma=vel_sd, decay=vel_decay)
+d_vel, t = velocity_temp__data(mu=vel_mean, sigma=vel_sd, decay=vel_decay, type='vel')
 t_new = t*1000
 d_new = d_vel.reshape(-1)
 
@@ -88,17 +146,6 @@ fig_vel = go.Figure(go.Histogram2d(
         ybins= dict(size = .264)
         ))
 
-t_text = ['Day 0 00:00',
-          'Day 0 12:00',
-          'Day 1 00:00',
-          'Day 1 12:00',
-          'Day 2 00:00',
-          'Day 2 12:00',
-          'Day 3 00:00',
-          'Day 3 12:00',
-          'Day 4 00:00',
-          'Day 4 12:00',
-          'Day 5 00:00']
 
 fig_vel.update_xaxes(tickangle=-90,
                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
