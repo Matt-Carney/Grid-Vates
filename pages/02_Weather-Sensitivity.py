@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
-from utils import DLR, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data
+from utils import DLR, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, wind_velocity_data
 
 st.title('Probabilistic Weather - Sensitivity')
 #st.markdown('This is some text')
@@ -22,18 +22,19 @@ sol_decay = st.sidebar.slider('Solar Temporal Decay', 0.0, 1.0, 1.0)
 sol_irr = st.sidebar.slider('Heat Flux (W)', 0, 2000, 1000)
 sol_perc = st.sidebar.slider('Percent Cloud Cover', 0.0, 1.0, 0.5)
 
+# Wind Velocity
+with st.sidebar:
+    st.write("Wind Velocity Variables (m/s)")
+vel_decay = st.sidebar.slider('Wind SPeed Temporal Decay', 0.0, 1.0, 1.0)
+vel_mean = st.sidebar.slider('Velocity', 1, 20, 9)
+vel_sd = st.sidebar.slider('Velocity Init. Standard Deviation', 0.1, 5.0, 2.0)
+
 # Wind Direction
 with st.sidebar:
     st.write("Wind Direction Variables")
 dir_decay = st.sidebar.slider('Wind Dir. Temporal Decay', 0.0, 1.0, 1.0)
 dir_deg = st.sidebar.slider('Degrees From Transmission Line Axis', 0, 360, 45)
 dir_kap = st.sidebar.slider('Kappa', 0.5, 10.0, 2.0)
-dir_temp_decay = np.linspace(0.0, dir_decay, 5)
-
-
-
-
-
 
 
 ### Solar Irradiance
@@ -64,16 +65,53 @@ fig_sol = go.Figure(go.Histogram2d(
         autobiny=False,
         ybins= dict(size = 40)
         ))
+
 fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance")
 
 st.plotly_chart(fig_sol)
 
+### Wind Velocity
+# Generate Data
+d_vel, t = wind_velocity_data(mu=vel_mean, sigma=vel_sd, decay=vel_decay)
+t_new = t*1000
+d_new = d_vel.reshape(-1)
 
+# Plot
+fig_vel = go.Figure(go.Histogram2d(
+        x = t_new,
+        y = d_new,
+        histnorm='percent',
+        colorscale='turbo',
+        autobinx=False,
+        xbins= dict(size= .264),
+        autobiny=False,
+        ybins= dict(size = .264)
+        ))
+
+t_text = ['Day 0 00:00',
+          'Day 0 12:00',
+          'Day 1 00:00',
+          'Day 1 12:00',
+          'Day 2 00:00',
+          'Day 2 12:00',
+          'Day 3 00:00',
+          'Day 3 12:00',
+          'Day 4 00:00',
+          'Day 4 12:00',
+          'Day 5 00:00']
+
+fig_vel.update_xaxes(tickangle=-90,
+                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                  ticktext = t_text
+                  )
+fig_vel.update_layout(height=400, width=900, title_text="Wind Velocity")
+st.plotly_chart(fig_vel)
 
 
 
 ### Wind Direction
 # Genearte Data
+dir_temp_decay = np.linspace(0.0, dir_decay, 5)
 df_pol_0, d_0 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[0])
 df_pol_1, d_1 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[1])
 df_pol_2, d_2 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[2])
