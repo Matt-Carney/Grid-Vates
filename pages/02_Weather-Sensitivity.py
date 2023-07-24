@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 from scipy.stats import norm
 from utils import DLR, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
 
-st.title('Probabilistic Weather - Sensitivity')
+st.title('Weather - Sensitivity')
 #st.markdown('This is some text')
 
 t_text = ['Day 0 00:00',
@@ -22,9 +22,6 @@ t_text = ['Day 0 00:00',
           'Day 4 00:00',
           'Day 4 12:00',
           'Day 5 00:00']
-
-
-
 
 
 
@@ -62,12 +59,12 @@ dir_kap = st.sidebar.slider('Kappa', 0.5, 10.0, 2.0)
 # Generate Data
 d_temp, t = velocity_temp__data(mu=temp_mean, sigma=temp_sd, decay=temp_decay, type='temp')
 t_new = t*1000
-d_new = d_temp.reshape(-1)
+d_temp_new = d_temp.reshape(-1)
 
 # Plot
 fig_temp = go.Figure(go.Histogram2d(
         x = t_new,
-        y = d_new,
+        y = d_temp_new,
         histnorm='percent',
         colorscale='turbo',
         autobinx=False,
@@ -91,7 +88,7 @@ st.plotly_chart(fig_temp)
 ### Solar Irradiance
 # Generate Data
 d_sol, t = solar_irr_data(sol_irr=sol_irr, sol_perc=sol_perc, decay=sol_decay)
-dists = d_sol.reshape(-1)
+d_sol_new = d_sol.reshape(-1)
 
 # Plot
 my_colorsc=[[0.0, 'rgb(231, 236, 239)'],
@@ -108,7 +105,7 @@ my_colorsc=[[0.0, 'rgb(231, 236, 239)'],
 
 fig_sol = go.Figure(go.Histogram2d(
         x = t,
-        y = dists,
+        y = d_sol_new,
         histnorm='percent',
         colorscale='turbo',
         autobinx=False,
@@ -132,12 +129,12 @@ st.plotly_chart(fig_sol)
 # Generate Data
 d_vel, t = velocity_temp__data(mu=vel_mean, sigma=vel_sd, decay=vel_decay, type='vel')
 t_new = t*1000
-d_new = d_vel.reshape(-1)
+d_vel_new = d_vel.reshape(-1)
 
 # Plot
 fig_vel = go.Figure(go.Histogram2d(
         x = t_new,
-        y = d_new,
+        y = d_vel_new,
         histnorm='percent',
         colorscale='turbo',
         autobinx=False,
@@ -181,6 +178,8 @@ for i in range(d_dir.shape[1]):
     elif i >= 96:
         d_dir[:,i] = d_4
 
+d_dir_new = d_dir.reshape(-1)
+
 # Plot
 fig_wind = make_subplots(rows=1, cols=5, specs=[[{'type': 'polar'},
                                                 {'type': 'polar'},
@@ -202,3 +201,51 @@ fig_wind.add_trace(go.Barpolar(r=df_pol_4['Percent'], theta=df_pol_4['wind_dir']
 
 
 st.plotly_chart(fig_wind)
+
+
+num_rand = 1000
+
+DLR_data = np.zeros((1000,120))
+
+for i in range(d_vel.shape[1]):
+    DLR_list = []
+    for j in range(num_rand):
+        rand_vel = np.random.choice(d_vel[:,i])
+        rand_dir = np.random.choice(d_dir[:,i])
+        rand_temp = np.random.choice(d_temp[:,i])
+        rand_sol = np.random.choice(d_sol[:,i])
+        #a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
+        #d.append(a.ampacity())
+        _dlr = DLR(wind_speed=rand_vel, wind_angle=rand_dir, ambient_temp=rand_temp, eff_rad_heat_flux=rand_sol)
+        DLR_temp = _dlr.ampacity()
+        DLR_list.append(DLR_temp)
+    DLR_data[:,i] = DLR_list
+
+
+DLR_data_new = DLR_data.reshape(-1)
+
+# Plot
+fig_DLR = go.Figure(go.Histogram2d(
+        x = t_new,
+        y = DLR_data_new,
+        histnorm='percent',
+        colorscale='turbo',
+        autobinx=False,
+        xbins= dict(size= .264),
+        #autobiny=False,
+        #ybins= dict(size = .264)
+        ))
+
+
+fig_DLR.update_xaxes(tickangle=-90,
+                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                  ticktext = t_text
+                  )
+fig_DLR.update_layout(height=400, width=900, title_text="DLR Forecast")
+st.plotly_chart(fig_DLR)
+
+
+
+
+#DLR_list.shape    
+    
