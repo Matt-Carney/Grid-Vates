@@ -10,11 +10,25 @@ from utils import DLR, temp_data, gen_normal, gen_uniform
 
 
 
-st.title('Probabilistic Weather - Scenarios')
+st.title('Weather - Scenarios')
 st.markdown('Determine the ampacity profile based on the enivronmental conditions below')
 
 
-x = np.arange(0., 10*np.pi, (1/24))
+x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
+
+t_text = ['Day 0 00:00',
+          'Day 0 12:00',
+          'Day 1 00:00',
+          'Day 1 12:00',
+          'Day 2 00:00',
+          'Day 2 12:00',
+          'Day 3 00:00',
+          'Day 3 12:00',
+          'Day 4 00:00',
+          'Day 4 12:00',
+          'Day 5 00:00']
+
+
 
 # Profile 1 - hot, high wind velocity, consistent wind angle about 45 deg perpindicualt to the transmission line
 temp_1 = temp_data(mu=30, delta=2, steps=x)
@@ -78,7 +92,9 @@ fig_0.update_layout(#title='Ampacity Profiles',
                    xaxis_title='Time',
                    yaxis_title='Ampacity (Ampes)', yaxis_range=[1000,3000], height=500, width=680)
 
-fig_0.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
+fig_0.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True,tickangle=-90,
+                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                  ticktext = t_text)
 fig_0.update_yaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
 
 st.plotly_chart(fig_0)

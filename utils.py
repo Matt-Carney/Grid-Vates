@@ -2,39 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-
-
-high = 30
-low = 20
-amp = (high-low)/2
-ave = (high+low)/2
-# t = np.arange(3, 27)
-# vals = np.sin(t) * amp + ave
-
-# fig, ax = plt.subplots()
-# ax.plot(t, vals, 'green')
-# plt.show()
-# plt.close()
-# vals
-
-p = np.pi*2
-p
-np.sin(2*np.pi)
-np.sin(p)
-np.sin(6.3)
-
-
-len(np.arange(0, 10*np.pi))
-time = np.arange(0., 10*np.pi, .1)
-vals = np.sin(time) #* 10
-#distance = np.zeros_like(time, dtype=float)
-
-fig, ax = plt.subplots()
-#ax1.set_ylabel("distance (m)")
-#ax1.set_xlabel("time")
-ax.plot(time, vals, "green")
-
-plt.show()
+from scipy.stats import norm
 
 
 def temp_data(mu=20, delta=2, steps=10):
@@ -101,6 +69,151 @@ def contour_data(mu = 20, sigma=3, time_steps=60, deacay=1.0, size=10000, bins=2
 
 
 
+def velocity_temp__data(mu = 20, sigma=1, decay=1.0, size=1000, type='temp'):
+    x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
+    time_steps = int(len(x))
+
+
+    dists = np.zeros((size, int(time_steps))) 
+
+    high = mu+3
+    low = mu-3
+    amp = (high-low)/2
+    ave = (high+low)/2
+    vals = np.sin(x) * amp + ave
+
+    #norm_init = gen_normal(mu, sigma, size)
+    #unif_bound = norm.ppf([0.1, 0.99], loc=mu, scale=sigma)
+    #unif_init = gen_uniform(unif_bound[0], unif_bound[1], size)
+
+    nums = []
+    for i in range(time_steps):
+        #if type == 'sine':
+        mu = vals[i]
+        
+        decay_per = (i)/time_steps
+        num_uniform = int(decay_per*size*decay)
+        num_normal = size - num_uniform
+
+        #if type == 'sine':
+        np.random.seed(123)
+        norm_0 = gen_normal(mu, sigma, num_normal)
+        if type == 'temp':
+            norm_0 = norm_0
+        elif type == 'vel':
+            norm_0 = np.abs(norm_0)
+        unif_bound = norm.ppf([0.001, 0.9999], loc=mu, scale=sigma)
+        
+        if type == 'temp':
+            unif_0 = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
+        elif type == 'vel':
+            unif_0 = gen_uniform(max(unif_bound[0], 0), unif_bound[1], num_uniform)
+        
+        #if rand == 'index':
+        norm_ = norm_0[0:num_normal]
+        unif_ = unif_0[0:num_uniform]
+        #elif rand == 'choice':
+        #    norm_ = np.random.choice(norm_0, num_normal, replace=False)
+        #    unif_ = np.random.choice(unif_0, num_uniform, replace=False)
+        samples = list(norm_) + list(unif_)
+        dists[:,i] = samples 
+        #dists[:,i] = norm_init
+        dists = np.array(dists)
+        
+        nums.append([num_normal, num_uniform])
+        
+    #dists[dists<=0] = 0.0
+    return dists, list(x)
+
+
+
+
+
+
+
+
+def solar_irr_data(sol_irr = 1000, sol_perc = 0.5, decay = 1.0):
+    x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
+    size = 1000
+    dists = np.zeros((size, int(len(x))))
+
+    irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0.97,\
+                    1.00, 0.98, 0.90, 0.77, 0.62, 0.47, 0.39, 0.00, 0.00, 0.00, 0.00, 0.00]
+
+    irr_perc = np.array(irr_perc_day*5)
+
+    red = 1.0 * (1.0-(.75* sol_perc))
+
+    for i, val in enumerate(irr_perc):
+        if val != 0.00:
+            ideal = [val * sol_irr * red]
+            #ideals = np.random.normal(ideal, scale=10, size=1000)
+            ideals = 1000 * ideal
+
+            decay_per = (i)/int(len(x))
+            num_uniform = int(decay_per * size * decay)
+            num_ideal = size - num_uniform
+            
+            ideal_ = np.random.choice(ideals, num_ideal, replace=True)
+            
+            unif_low = val*sol_irr*.25
+            unif_high = val*sol_irr*1
+            np.random.seed(123)
+            #unif = np.random.uniform(low=unif_low, high=unif_high, size=size)
+            unif = np.random.normal(loc=ideal, scale=100, size=size)
+            np.random.seed(123)
+            unif_ = np.random.choice(unif, num_uniform, replace=True)
+
+            #samples = unif
+            #samples = np.concatenate(ideal_, unif_)
+            samples = list(ideal_) + list(unif_) #Clean this up
+            samples = np.array(samples)
+            samples[samples<0] = 0.0
+            dists[:,i] = samples 
+
+    t = list(x)*1000
+
+
+    return dists, t
+
+
+
+
+
+
+def wind_direction_data(deg = 45, kap = 2, size = 1000, perc_unif = 0.5):
+    rad = deg * (np.pi/180)
+
+    np.random.seed(123)
+    vm_init = np.random.vonmises(mu=rad, kappa=kap, size=size) # -pi to pi
+    unif_init = gen_uniform(0, 360, size) # 0 - 360 degrees
+
+    num_unif = int(size*perc_unif)
+    num_vm = size - num_unif
+
+    vm = vm_init[0:num_vm]
+    unif = unif_init[0:num_unif]
+
+    vm_2pi = np.mod(vm, 2*np.pi) # 0 - 2 pi
+    vm_deg = vm_2pi * (180/np.pi) # 0 - 360 degrees
+    
+    agg_dist = np.concatenate((vm_deg, unif))
+    #agg_dist = vm_deg
+
+    pol_bins = np.linspace(0,360,17)
+    bin_val = np.digitize(agg_dist, bins= pol_bins)
+
+    pol_val = []
+    for i in bin_val:
+        temp = pol_bins[i]
+        pol_val.append(temp)
+
+
+    df_pol = pd.DataFrame({'wind_dir': pol_val})
+    df_pol = df_pol.groupby(['wind_dir']).size().reset_index().rename(columns={0: 'count'})
+    df_pol['Percent'] = df_pol['count']/df_pol['count'].sum()
+
+    return df_pol, agg_dist
 
 
 class DLR:
