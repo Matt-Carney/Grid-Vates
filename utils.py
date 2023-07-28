@@ -156,8 +156,8 @@ def solar_irr_data(sol_irr = 1000, sol_perc = 0.5, decay = 1.0):
             
             ideal_ = np.random.choice(ideals, num_ideal, replace=True)
             
-            unif_low = val*sol_irr*.25
-            unif_high = val*sol_irr*1
+            #unif_low = val*sol_irr*.25
+            #unif_high = val*sol_irr*1
             np.random.seed(123)
             #unif = np.random.uniform(low=unif_low, high=unif_high, size=size)
             unif = np.random.normal(loc=ideal, scale=100, size=size)
