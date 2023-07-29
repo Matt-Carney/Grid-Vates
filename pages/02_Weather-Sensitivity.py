@@ -17,18 +17,18 @@ with st.expander("Here's what's going on..."):
             At t = 0, 1,000 random samples are generated from an initial distribution determined by the initial distriution parameters.\
             Additionally, at t = 0 an end-state distribution of 1,000 is also generated. For every time step n\
             an aggregate distribution is collated by seleting (n * temporal decay) samples of the end-state distribution and\
-            ((1000-n) * temporal decay) of the initial dribution. Thus, a tempooral decay of 0.0 will persist the initial distibution through the time space\
-            and a temporay decay of 1.0 will linearly transition completly from the initial distribution at t=0 to the end-state distribution\
-            at the end of day 5 (t=120). A temporal decay of 0.5 will linearly transition from the initial at t=0 to 50% of the end state\
+            ((1000-n) * temporal decay) of the initial dribution. **Thus, a temporal decay of 0.0 will persist the initial distibution through the time space\
+            and a temporal decay of 1.0 will linearly transition completly from the initial distribution at t=0 to the end-state distribution\
+            at the end of day 5 (t=120).** A temporal decay of 0.5 will linearly transition from the initial at t=0 to 50% of the end state\
             distribution at the end of day 5 (t=120). And so on...")
     st.markdown("The initial and end state distributions are as follows:")
-    st.markdown("Temperature : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
-    st.markdown("Solar Irradiance : Heat Flux is deterministic since it can b e calculated by the Earth's sphericity and orbital pattern.\
+    st.markdown("**Temperature** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
+    st.markdown("**Solar Irradiance** : Heat Flux is deterministic since it can b e calculated by the Earth's sphericity and orbital pattern.\
                 The maximum reduction of Solar Irradiance with 100% cloud cover is 0.75, thus the end-state distribution is Normal(ideal*cloud cover*0.75)")
-    st.markdown("Wind Velocity : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
-    st.markdown("Wind Direction : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
+    st.markdown("**Wind Velocity** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
+    st.markdown("**Wind Direction** : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
                 Note that a vonMises distribution is a circular normal distribution")
-    st.markdown("Wind Direction : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
+    st.markdown("**Wind Direction** : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
                 Note that a vonMises distribution is a circular normal distribution")
     st.markdown("Finally, for each time step t, the DLR is determined by randomly sampling a temperature, solar irradiance,\
                 wind velocity and wind direction value 1,000 times and calculated using the IEEE 738-2006 methodology.")
@@ -52,22 +52,22 @@ t_text = ['Day 0 00:00',
 with st.sidebar:
     st.write("Temperature Variables")
 temp_decay = st.sidebar.slider('Temperature Temporal Decay', 0.0, 1.0, 1.0)
-temp_mean = st.sidebar.slider('Degrees (C)', 1, 50, 15)
-temp_sd = st.sidebar.slider('Deg Init. Standard Deviation', 0.1, 5.0, 2.0)
+temp_mean = st.sidebar.slider('Temperature (C)', 1, 50, 15)
+temp_sd = st.sidebar.slider('Temperature Init. Standard Deviation', 0.1, 5.0, 2.0)
 
 # Solar Irradiance
 with st.sidebar:
     st.write("Solar Irradiance Variables")
 sol_decay = st.sidebar.slider('Solar Temporal Decay', 0.0, 1.0, 1.0)
-sol_irr = st.sidebar.slider('Heat Flux (W)', 0, 2000, 1000)
+sol_irr = st.sidebar.slider('Heat Flux (W/m^2)', 0, 2000, 1000)
 sol_perc = st.sidebar.slider('Percent Cloud Cover', 0.0, 1.0, 0.5)
 
 # Wind Velocity
 with st.sidebar:
-    st.write("Wind Velocity Variables (m/s)")
-vel_decay = st.sidebar.slider('Wind SPeed Temporal Decay', 0.0, 1.0, 1.0)
-vel_mean = st.sidebar.slider('Velocity', 1, 20, 9)
-vel_sd = st.sidebar.slider('Velocity Init. Standard Deviation', 0.1, 5.0, 2.0)
+    st.write("Wind Velocity Variables")
+vel_decay = st.sidebar.slider('Wind Velocity Temporal Decay', 0.0, 1.0, 1.0)
+vel_mean = st.sidebar.slider('Wind Velocity (m/s)', 1, 20, 9)
+vel_sd = st.sidebar.slider('Wind Velocity Init. Standard Deviation', 0.1, 5.0, 2.0)
 
 # Wind Direction
 with st.sidebar:
@@ -100,9 +100,9 @@ fig_temp.update_xaxes(tickangle=-90,
                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
                   ticktext = t_text
                   )
-fig_temp.update_layout(height=400, width=900, title_text="Temperature")
-st.plotly_chart(fig_temp)
-
+fig_temp.update_layout(height=400, width=900, title_text="Temperature",
+                       xaxis_title='Time',
+                    yaxis_title='Temperature (C)')
 
 
 
@@ -136,7 +136,9 @@ fig_sol = go.Figure(go.Histogram2d(
         ybins= dict(size = 40)
         ))
 
-fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance")
+fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance",
+                      xaxis_title='Time',
+                    yaxis_title='Heat Flux (W/m^2)',)
 
 fig_sol.update_xaxes(tickangle=-90,
                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
@@ -144,8 +146,6 @@ fig_sol.update_xaxes(tickangle=-90,
                   )
 
 
-
-st.plotly_chart(fig_sol)
 
 ### Wind Velocity
 # Generate Data
@@ -166,12 +166,13 @@ fig_vel = go.Figure(go.Histogram2d(
         ))
 
 
+fig_vel.update_layout(height=400, width=900, title_text="Wind Velocity",
+                                        xaxis_title='Time',
+                  yaxis_title='Velocity (m/s)')
+
 fig_vel.update_xaxes(tickangle=-90,
                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-                  ticktext = t_text
-                  )
-fig_vel.update_layout(height=400, width=900, title_text="Wind Velocity")
-st.plotly_chart(fig_vel)
+                  ticktext = t_text)
 
 
 
@@ -209,7 +210,9 @@ fig_wind = make_subplots(rows=1, cols=5, specs=[[{'type': 'polar'},
                                                 {'type': 'polar'},
                                                 {'type': 'polar'}]])
 
-fig_wind.update_layout(height=280, width=900, title_text="Wind Direction")
+fig_wind.update_layout(height=280, width=900, title_text="Wind Direction",
+                       xaxis_title='Time',
+                    yaxis_title='Degrees',)
 
 max_step = df_pol_0['Percent'].max()+0.05
 fig_wind.update_polars(radialaxis = dict(range=[0, max_step],nticks=5),
@@ -221,8 +224,6 @@ fig_wind.add_trace(go.Barpolar(r=df_pol_2['Percent'], theta=df_pol_2['wind_dir']
 fig_wind.add_trace(go.Barpolar(r=df_pol_3['Percent'], theta=df_pol_3['wind_dir'], name='Day 4', showlegend=True), row=1, col=4)
 fig_wind.add_trace(go.Barpolar(r=df_pol_4['Percent'], theta=df_pol_4['wind_dir'], name='Day 5', showlegend=True), row=1, col=5)
 
-
-st.plotly_chart(fig_wind)
 
 
 num_rand = 1000
@@ -261,13 +262,28 @@ fig_DLR = go.Figure(go.Histogram2d(
 
 fig_DLR.update_xaxes(tickangle=-90,
                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-                  ticktext = t_text
+                  ticktext = t_text, 
                   )
-fig_DLR.update_layout(height=400, width=900, title_text="DLR Forecast")
+fig_DLR.update_layout(height=400, width=900, title_text="DLR Forecast",
+                    xaxis_title='Time',
+                    yaxis_title='Rating (Amps)',)
+
+# Plot All Figures
 st.plotly_chart(fig_DLR)
+hide = """
+<style>
+ul.streamlit-expander {
+    border: 0 !important;
+</style>
+"""
 
+st.markdown(hide, unsafe_allow_html=True)
+with st.expander("Expand for Temperature"):
+    st.plotly_chart(fig_temp)
+with st.expander("Expand for Solar Irradiance"):
+    st.plotly_chart(fig_sol)
+with st.expander("Expand for Wind Velocity"):
+    st.plotly_chart(fig_vel)
+with st.expander("Expand for Wind Direction"):
+    st.plotly_chart(fig_wind)
 
-
-
-#DLR_list.shape    
-    

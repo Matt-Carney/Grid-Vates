@@ -90,7 +90,7 @@ fig_0.add_trace(go.Scatter(x=x, y=dlr_4, line=prof_4, name='Profile 4', showlege
 
 fig_0.update_layout(#title='Ampacity Profiles',
                    xaxis_title='Time',
-                   yaxis_title='Ampacity (Ampes)', yaxis_range=[1000,3000], height=500, width=680)
+                   yaxis_title='Ratings (Amps)', yaxis_range=[1000,3000], height=500, width=680)
 
 fig_0.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True,tickangle=-90,
                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
@@ -111,9 +111,11 @@ with st.expander("Cool temperature, moderate wind velocity, inconsistent wind an
 
     fig_1.update_layout(#title='Ampacity Profiles',
                     xaxis_title='Time',
-                    yaxis_title='Ampacity (Ampes)', yaxis_range=[1000,3000], height=500, width=680)
+                    yaxis_title='Rating (Amps)', yaxis_range=[1000,3000], height=500, width=680)
 
-    fig_1.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
+    fig_1.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True,\
+                                         tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                                            ticktext = t_text, tickangle=270)
     fig_1.update_yaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
         
     st.plotly_chart(fig_1)
@@ -130,9 +132,11 @@ with st.expander("Cool temperature, moderate wind velocity, consistent wind angl
     fig_2.add_trace(go.Scatter(x=x, y=dlr_4, line=prof_4, name='Profile 4', showlegend=True))
     fig_2.update_layout(#title='Ampacity Profiles',
                 xaxis_title='Time',
-                yaxis_title='Ampacity (Ampes)', yaxis_range=[1000,3000], height=500, width=680)
+                yaxis_title='Rating (Amps)', yaxis_range=[1000,3000], height=500, width=680)
 
-    fig_2.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
+    fig_2.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True,
+                       tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                                            ticktext = t_text, tickangle=270)
     fig_2.update_yaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
     
     st.plotly_chart(fig_2)
@@ -149,9 +153,11 @@ with st.expander("Cool temperature, low wind velocity, consistent wind angle (45
     
     fig_3.update_layout(#title='Ampacity Profiles',
             xaxis_title='Time',
-            yaxis_title='Ampacity (Ampes)', yaxis_range=[1000,3000], height=500, width=680)
+            yaxis_title='Rating (Amps)', yaxis_range=[1000,3000], height=500, width=680)
 
-    fig_3.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
+    fig_3.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True,
+                       tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                                            ticktext = t_text, tickangle=270)
     fig_3.update_yaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
     
     st.plotly_chart(fig_3)
@@ -170,9 +176,11 @@ with st.expander("Hot temperature, high wind velocity, consistent wind angle (45
 
     fig_4.update_layout(#title='Ampacity Profiles',
                     xaxis_title='Time',
-                    yaxis_title='Ampacity (Ampes)', yaxis_range=[1000,3000], height=500, width=680)
+                    yaxis_title='Rating (Amps)', yaxis_range=[1000,3000], height=500, width=680)
 
-    fig_4.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
+    fig_4.update_xaxes(showline=True, linewidth=2, linecolor='black', mirror=True,
+                       tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                                            ticktext = t_text, tickangle=270)
     fig_4.update_yaxes(showline=True, linewidth=2, linecolor='black', mirror=True)
 
     st.plotly_chart(fig_4)

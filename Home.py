@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
+st.set_page_config(page_title="Grid Vātēs")
+
 #st.set_page_config(layout="wide")
 
 st.title('Welcom to Grid Vātēs!')
@@ -18,13 +20,13 @@ st.header('A Dynamic Line Rating Educational Sandbox')
 
 
 st.write('<font size="4">Vātēs is a Latin term used to refer to a prophet, seer, or poet; \
-         someone believed to possess the ability to predict the future.\
+         someone believed to possess the ability to predict the future[1].\
          The goal of this web app is to transform you into a DLR Vātēs!\
          A summary of each tab, which can be accessed through the left pane, is listed below.</font>', unsafe_allow_html=True)
 
 st.write('')
 st.subheader('Benefits of DLR')
-st.markdown("Your one-stop-shop to learn about what Dynmic Line Ratings are and why they're important.")
+st.markdown("Your one-stop-shop to learn about Dynmic Line Ratings and why they're important.")
 
 st.subheader('Weather - Sensitivity')
 st.markdown("This is the experimental sandbox ya'll have been asking for.\
