@@ -11,7 +11,7 @@ from utils import DLR, temp_data, gen_normal, gen_uniform
 
 
 st.title('Weather - Scenarios')
-st.markdown('Determine the ampacity profile based on the enivronmental conditions below')
+st.markdown('Determine the ampacity profile based on the enivronmental conditions below.')
 
 
 x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)

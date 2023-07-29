@@ -15,7 +15,7 @@ with st.expander("Here's what's going on..."):
     st.markdown("For each of the weather forecasts (Temperature, Solar Irradiance, Wind Velocity, Wind Direction) there are\
             two groups of variables to experiment with - temporal decay and the initial distribution parameters.\
             At t = 0, 1,000 random samples are generated from an initial distribution determined by the initial distriution parameters.\
-            Additionally, at t = 0 an end-state distribution of 1,000 is also generated. For every time step n\
+            Additionally, at t = 0 an end-state distribution of 1,000 samples is also generated. For every time step n,\
             an aggregate distribution is collated by seleting (n * temporal decay) samples of the end-state distribution and\
             ((1000-n) * temporal decay) of the initial dribution. **Thus, a temporal decay of 0.0 will persist the initial distibution through the time space\
             and a temporal decay of 1.0 will linearly transition completly from the initial distribution at t=0 to the end-state distribution\
@@ -24,10 +24,8 @@ with st.expander("Here's what's going on..."):
     st.markdown("The initial and end state distributions are as follows:")
     st.markdown("**Temperature** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
     st.markdown("**Solar Irradiance** : Heat Flux is deterministic since it can b e calculated by the Earth's sphericity and orbital pattern.\
-                The maximum reduction of Solar Irradiance with 100% cloud cover is 0.75, thus the end-state distribution is Normal(ideal*cloud cover*0.75)")
+                The maximum reduction of Solar Irradiance with 100% cloud cover is 0.75, thus the end-state distribution is Normal(ideal x cloud cover x 0.75)")
     st.markdown("**Wind Velocity** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
-    st.markdown("**Wind Direction** : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
-                Note that a vonMises distribution is a circular normal distribution")
     st.markdown("**Wind Direction** : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
                 Note that a vonMises distribution is a circular normal distribution")
     st.markdown("Finally, for each time step t, the DLR is determined by randomly sampling a temperature, solar irradiance,\
