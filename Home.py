@@ -9,7 +9,7 @@ st.set_page_config(page_title="Grid Vātēs")
 
 #st.set_page_config(layout="wide")
 
-st.title('Welcom to Grid Vātēs!')
+st.title('Welcome to Grid Vātēs!')
 st.header('A Dynamic Line Rating Educational Sandbox')
 #st.subheader('Vātēs is a Latin term used to refer to a prophet, seer, or poet;\
 #            someone believed to possess the ability to predict the future')
@@ -26,20 +26,20 @@ st.write('<font size="4">Vātēs is a Latin term used to refer to a prophet, see
 
 st.write('')
 st.subheader('Benefits of DLR')
-st.markdown("Your one-stop-shop to learn about Dynmic Line Ratings and why they're important.")
+st.markdown("Your one-stop-shop to learn about Dynamic Line Ratings and why they're important.")
 
 st.subheader('Weather - Sensitivity')
 st.markdown("This is the experimental sandbox ya'll have been asking for.\
-            As you may be aware, the DLR rating is influeced by ambient environmental conditions\
-            such as temerature, solar irradiance, wind speed and wind direction. Accordingly, a DLR forecast\
+            As you may be aware, the DLR rating is influenced by ambient environmental conditions\
+            such as temperature, solar irradiance, wind speed and wind direction. Accordingly, a DLR forecast\
             is a 'forecast of forecasts' of said environmental conditions.\
-            Experiment with different environmental condition paramaters and see how they affect the DLR forecast.")
+            Experiment with different environmental condition parameters and see how they affect the DLR forecast.")
 
 
 st.subheader('Weather - Scenarios')
 st.markdown("This is a knowledge check after your experimentation on the Weather-Sensitivity tab.\
             Here, you're presented with several rating profiles and are asked to select\
-            the corresponding environmental condidtions.")
+            the corresponding environmental conditions.")
 
 
 st.write('')
