@@ -8,6 +8,8 @@ Transmission line load limits are largely determined by environmental conditions
 
 ## Features
 To address the abovementioned gap, Grid Vātēs - A Dynamic Line Rating Experimental Sandbox was developed, leveraging three main learning components: <br>1.) An overview of the benefits of DLR <br>2.) The impact of uncertainty in probabilistic weather forecasts on DLR forecasts <br>3.) A scenario analysis knowledge check. 
+<br>
+![Weather - Sensitivity Screenshot](images/Vates_screen_shot.png)
 
 ## Installation
 To run this project locally, follow these steps:
