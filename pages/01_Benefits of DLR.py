@@ -42,7 +42,7 @@ st.subheader('How are they calculated?')
 st.markdown("The ampacity (ie. max current or 'Rating') is calculated from the IEEE Standard 738-2006 - Steady State Heat Balance[4]")
 
 st.write('')
-IEEE_SS = Image.open('IEEE_Steady_State_DLR.png')
+IEEE_SS = Image.open('images/IEEE_Steady_State_DLR.png')
 st.image(IEEE_SS, width=200)
 st.markdown("Where:")
 st.markdown(" - qc = convected heat loss rate per unit length")
