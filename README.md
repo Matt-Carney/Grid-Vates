@@ -7,10 +7,7 @@ Welcome to **Grid Vātēs**! This project was developed as part of Georgia Tech 
 Transmission line load limits are largely determined by environmental conditions, with factors such as minimum clearance distance and maximum thermal thresholds being influenced by ambient temperature, wind speed, wind direction, and solar irradiance. Dynamic line ratings (DLR) present an beneficial approach to grid operation, optimizing load capacity while maintaining safety through the use of weather forecasts and real-time monitoring. Improving the accuracy of DLR forecasts has been the subject of extensive research, employing various techniques like time series modeling, deep learning, and specialty software. However, a gap remains in understanding and building intuition on the relationship between weather forecasts, their uncertainty, and their impact on dynamic line ratings. 
 
 ## Features
-To address the abovementioned gap, Grid Vātēs - A Dynamic Line Rating Experimental Sandbox was developed, leveraging three main learning components:
-1.) An overview of the benefits of DLR
-2.) The impact of uncertainty in probabilistic weather forecasts on DLR forecasts
-3.) A scenario analysis knowledge check. Grid Vātēs offers a novel and interactive approach to understand the relationship between weather forecasts and their impact on dynamic line ratings
+To address the abovementioned gap, Grid Vātēs - A Dynamic Line Rating Experimental Sandbox was developed, leveraging three main learning components:  1.) An overview of the benefits of DLR  2.) The impact of uncertainty in probabilistic weather forecasts on DLR forecasts  3.) A scenario analysis knowledge check. Grid Vātēs offers a novel and interactive approach to understand the relationship between weather forecasts and their impact on dynamic line ratings
 
 ## Installation
 To run this project locally, follow these steps:
