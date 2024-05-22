@@ -166,7 +166,7 @@ with st.expander("Cool temperature, low wind velocity, consistent wind angle (45
 
 
 with st.expander("Hot temperature, high wind velocity, consistent wind angle (45 deg) to the transmission line"):
-    st.write("Profile 1! While the ambient temperature is hotter, the higher wind velocity increases the overall amapcity.")
+    st.write("Profile 1! While the ambient temperature is hotter, the higher wind velocity increases the overall ampacity.")
 
     fig_4 = go.Figure()
     fig_4.add_trace(go.Scatter(x=x, y=dlr_1, line = {'shape': 'spline', 'color': 'blue', 'width': 6}, name='Profile 1', showlegend=True))

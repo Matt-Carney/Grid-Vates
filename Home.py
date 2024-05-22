@@ -49,10 +49,11 @@ st.markdown('Please feel free to reach out with any questions or feedback - mcar
 
 st.write('')
 st.write('')
-phil = Image.open('phil.png')
-with st.expander("Expand this drop down to see a painting of the original Grid Vātēs himself!"):
-    st.write('Just kidding, but thanks DALL-E!')
-    st.image(phil)
+vates = Image.open('DALLE_vates_image.png')
+st.image(vates)
+#with st.expander("Expand this drop down to see a painting of the original Grid Vātēs himself!"):
+#    st.write('Just kidding, but thanks DALL-E!')
+#    st.image(phil)
 
 
 

@@ -14,11 +14,11 @@ st.markdown('Experiemnt with the weather forecast variables on the left and obse
 with st.expander("Here's what's going on..."):
     st.markdown("For each of the weather forecasts (Temperature, Solar Irradiance, Wind Velocity, Wind Direction) there are\
             two groups of variables to experiment with - temporal decay and the initial distribution parameters.\
-            At t = 0, 1,000 random samples are generated from an initial distribution determined by the initial distriution parameters.\
+            At t = 0, 1,000 random samples are generated from an initial distribution determined by the initial distribution parameters.\
             Additionally, at t = 0 an end-state distribution of 1,000 samples is also generated. For every time step n,\
-            an aggregate distribution is collated by seleting (n * temporal decay) samples of the end-state distribution and\
-            ((1000-n) * temporal decay) of the initial dribution. **Thus, a temporal decay of 0.0 will persist the initial distibution through the time space\
-            and a temporal decay of 1.0 will linearly transition completly from the initial distribution at t=0 to the end-state distribution\
+            an aggregate distribution is collated by selecting (n * temporal decay) samples of the end-state distribution and\
+            ((1000-n) * temporal decay) of the initial dribution. **Thus, a temporal decay of 0.0 will persist the initial distribution through the time space\
+            and a temporal decay of 1.0 will linearly transition completely from the initial distribution at t=0 to the end-state distribution\
             at the end of day 5 (t=120).** A temporal decay of 0.5 will linearly transition from the initial at t=0 to 50% of the end state\
             distribution at the end of day 5 (t=120). And so on...")
     st.markdown("The initial and end state distributions are as follows:")
