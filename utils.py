@@ -3,6 +3,48 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+from scipy.stats import truncnorm
+import plotly.graph_objects as go
+
+def plot_fig(x, y):
+    # Plot
+    t_text = ['Day 0 00:00',
+          'Day 0 12:00',
+          'Day 1 00:00',
+          'Day 1 12:00',
+          'Day 2 00:00',
+          'Day 2 12:00',
+          'Day 3 00:00',
+          'Day 3 12:00',
+          'Day 4 00:00',
+          'Day 4 12:00',
+          'Day 5 00:00']
+
+    y = y.flatten()
+    
+    fig = go.Figure(go.Histogram2d(
+            x = x,
+            y = y,
+            histnorm='percent',
+            colorscale='turbo',
+            autobinx=False,
+            xbins= dict(size= .264),
+            autobiny=False,
+            ybins= dict(size = .264)
+            ))
+
+
+    fig.update_xaxes(tickangle=-90,
+                    tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                    ticktext = t_text
+                    )
+    fig.update_layout(height=400, width=900, title_text="Temperature",
+                        xaxis_title='Time',
+                        yaxis_title='Temperature (C)')
+
+    #fig_temp.show()
+    return fig
+
 
 
 def temp_data(mu=20, delta=2, steps=10):
@@ -18,55 +60,6 @@ def gen_uniform(low=0, high=1.0, size=10000):
 
 def gen_normal(mu=5, sigma=0.1, num=10000):
     return np.random.normal(loc=mu, scale=sigma, size=num)
-
-
-def contour_data(mu = 20, sigma=3, time_steps=60, deacay=1.0, size=10000, bins=20, is_sin = False):
-    x = np.arange(time_steps)
-    z = np.zeros((int(bins), int(time_steps)))
-
-
-    if is_sin == True:
-        high = mu+10
-        low = mu-10
-        amp = (high-low)/2
-        ave = (high+low)/2
-        t = np.arange(time_steps)
-        vals = np.sin(t) * amp + ave
-
-    for i in range(time_steps):
-        if is_sin == True:
-            mu = vals[i]
-        # Uniform/Normal split
-        decay_per = (i+1)/time_steps
-        num_uniform = int(decay_per*size)
-        num_normal = size - num_uniform
-
-        # Gernerate data
-        norm_ = gen_normal(mu, sigma, num_normal)
-        unif_bound = norm.ppf([0.01, 0.999], loc=mu, scale=sigma) # Set uniform distribution to 95th
-        unif = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
-
-        samples = list(norm_) + list(unif)
-
-
-        # Determine y values of bins
-        if i == 0: 
-            hist = np.histogram(samples, bins)
-            y_out = hist[1][:-1] # Need to remove last bin edge
-            y = hist[1]
-            z_temp = hist[0]/len(samples)
-            #z_temp = z_temp.reshape(z_temp.shape[0],1)
-
-        # Apply y values
-        else:
-            hist = np.histogram(samples, bins = y)
-            z_temp = hist[0]/len(samples)
-            #z_temp = z_temp.reshape(z_temp.shape[0],1)
-
-        z[:,i] = z_temp
-    
-    return x, y, z
-
 
 
 def velocity_temp__data(mu = 20, sigma=1, decay=1.0, size=1000, type='temp'):
@@ -124,6 +117,70 @@ def velocity_temp__data(mu = 20, sigma=1, decay=1.0, size=1000, type='temp'):
         
     #dists[dists<=0] = 0.0
     return dists, list(x)
+
+
+
+
+def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_size=1000,
+                                      temp_range=6, trend=0.02, 
+                                      initial_uncertainty=0.5, 
+                                      uncertainty_growth=0.02, 
+                                      random_walk_scale=0.1,
+                                      type='temp'):
+    
+    x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
+    
+    # Base temperature pattern
+    daily_pattern = np.sin(x) * temp_range / 2
+    trend_component = trend * np.arange(n_steps)
+    y = mean + daily_pattern + trend_component
+    
+    # Random walk component
+    random_walk = np.cumsum(np.random.normal(0, random_walk_scale, n_steps))
+    y += random_walk
+    
+    # Generate probabilistic data with truncated normal distribution
+    data = []
+    for i in range(n_steps):
+        uncertainty = initial_uncertainty + uncertainty_growth * i
+        total_std = np.sqrt(std_dev**2 + uncertainty**2)
+        
+        # if type == 'temp':
+        #     a, b = (min_temp - y[i]) / total_std, (max_temp - y[i]) / total_std
+        # elif type == 'vel':
+        #     a, b = (0 - y[i]) / total_std, np.inf
+        
+
+        if type == 'temp':
+            a, b = -3, 3  # ±3 standard deviations for temperature
+        elif type == 'vel':
+            a = max(-3, -y[i] / total_std) # Lower bound: max of -3 std dev or 0
+            b = 3  # 0 to +3 standard deviations for velocity (to keep it non-negative)
+
+        samples = truncnorm.rvs(a, b, loc=y[i], scale=total_std, size=sample_size)
+        data.append(samples)
+
+    # Reshape data to match the expected input format for plot_fig
+    x_plot = np.repeat(x, sample_size)
+    y_plot = np.array(data)
+    #y_plot = np.array(data).flatten()
+    
+    return x_plot, y_plot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

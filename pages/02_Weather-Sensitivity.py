@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
-from utils import DLR, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
+from utils import DLR, plot_fig, generate_synthetic_temp_truncated, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
 
 st.title('Weather - Sensitivity')
 st.markdown('Experiemnt with the weather forecast variables on the left and observe how it changes the DLR forecast!')
@@ -49,9 +49,10 @@ t_text = ['Day 0 00:00',
 # Temperature
 with st.sidebar:
     st.write("Temperature Variables")
-temp_decay = st.sidebar.slider('Temperature Temporal Decay', 0.0, 1.0, 1.0)
 temp_mean = st.sidebar.slider('Temperature (C)', 1, 50, 15)
-temp_sd = st.sidebar.slider('Temperature Init. Standard Deviation', 0.1, 5.0, 2.0)
+temp_std = st.sidebar.slider('Temperature Initial Standard Deviation', 0.1, 5.0, 2.0)
+temp_init_uncertainty = st.sidebar.slider('Temperature Initial Uncertainty', 0.0, 1.0, 0.5)
+temp_uncertainty_growth = st.sidebar.slider('Temperature Uncertainty Growth', 0.0, 1.0, 0.02)
 
 # Solar Irradiance
 with st.sidebar:
@@ -77,30 +78,49 @@ dir_kap = st.sidebar.slider('Kappa', 0.5, 10.0, 2.0)
 
 ### Temperature
 # Generate Data
-d_temp, t = velocity_temp__data(mu=temp_mean, sigma=temp_sd, decay=temp_decay, type='temp')
-t_new = t*1000
-d_temp_new = d_temp.reshape(-1)
+#d_temp, t = velocity_temp__data(mu=temp_mean, sigma=temp_sd, decay=temp_decay, type='temp')
+#t_new = t*1000
+#d_temp_new = d_temp.reshape(-1)
 
-# Plot
-fig_temp = go.Figure(go.Histogram2d(
-        x = t_new,
-        y = d_temp_new,
-        histnorm='percent',
-        colorscale='turbo',
-        autobinx=False,
-        xbins= dict(size= .264),
-        autobiny=False,
-        ybins= dict(size = .264)
-        ))
+x_temp, y_temp = generate_synthetic_temp_truncated(mean=temp_mean,
+                                         std_dev=temp_std,
+                                         initial_uncertainty=temp_init_uncertainty, 
+                                         uncertainty_growth=temp_uncertainty_growth,
+                                         type='temp')
 
 
-fig_temp.update_xaxes(tickangle=-90,
-                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-                  ticktext = t_text
-                  )
-fig_temp.update_layout(height=400, width=900, title_text="Temperature",
-                       xaxis_title='Time',
-                    yaxis_title='Temperature (C)')
+
+
+fig_temp = plot_fig(x=x_temp, y=y_temp)
+
+
+
+
+#fig = plot_fig(x, y)
+
+
+
+
+# # Plot
+# fig_temp = go.Figure(go.Histogram2d(
+#         x = t_new,
+#         y = d_temp_new,
+#         histnorm='percent',
+#         colorscale='turbo',
+#         autobinx=False,
+#         xbins= dict(size= .264),
+#         autobiny=False,
+#         ybins= dict(size = .264)
+#         ))
+
+
+# fig_temp.update_xaxes(tickangle=-90,
+#                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+#                   ticktext = t_text
+#                   )
+# fig_temp.update_layout(height=400, width=900, title_text="Temperature",
+#                        xaxis_title='Time',
+#                     yaxis_title='Temperature (C)')
 
 
 
@@ -173,7 +193,6 @@ fig_vel.update_xaxes(tickangle=-90,
                   ticktext = t_text)
 
 
-
 ### Wind Direction
 # Genearte Data
 dir_temp_decay = np.linspace(0.0, dir_decay, 5)
@@ -233,7 +252,7 @@ for i in range(d_vel.shape[1]):
     for j in range(num_rand):
         rand_vel = np.random.choice(d_vel[:,i])
         rand_dir = np.random.choice(d_dir[:,i])
-        rand_temp = np.random.choice(d_temp[:,i])
+        rand_temp = np.random.choice(y_temp[:,i])
         rand_sol = np.random.choice(d_sol[:,i])
         #a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
         #d.append(a.ampacity())
