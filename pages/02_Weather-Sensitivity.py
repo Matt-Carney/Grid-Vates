@@ -50,9 +50,8 @@ t_text = ['Day 0 00:00',
 with st.sidebar:
     st.write("Temperature Variables")
 temp_mean = st.sidebar.slider('Temperature (C)', 1, 50, 15)
-temp_std = st.sidebar.slider('Temperature Initial Standard Deviation', 0.1, 5.0, 2.0)
-temp_init_uncertainty = st.sidebar.slider('Temperature Initial Uncertainty', 0.0, 1.0, 0.5)
-temp_uncertainty_growth = st.sidebar.slider('Temperature Uncertainty Growth', 0.0, 1.0, 0.02)
+temp_init_std_dev = st.sidebar.slider('Temperature Initial Standard Deviation', 0.1, 5.0, 1.0)
+temp_uncertainty_growth = st.sidebar.slider('Temperature Uncertainty Growth', 0.0, 0.05, 0.01)
 
 # Solar Irradiance
 with st.sidebar:
@@ -77,51 +76,12 @@ dir_kap = st.sidebar.slider('Kappa', 0.5, 10.0, 2.0)
 
 
 ### Temperature
-# Generate Data
-#d_temp, t = velocity_temp__data(mu=temp_mean, sigma=temp_sd, decay=temp_decay, type='temp')
-#t_new = t*1000
-#d_temp_new = d_temp.reshape(-1)
-
 x_temp, y_temp = generate_synthetic_temp_truncated(mean=temp_mean,
-                                         std_dev=temp_std,
-                                         initial_uncertainty=temp_init_uncertainty, 
+                                         std_dev=temp_init_std_dev, 
                                          uncertainty_growth=temp_uncertainty_growth,
                                          type='temp')
 
-
-
-
 fig_temp = plot_fig(x=x_temp, y=y_temp, title = 'Temperature')
-
-
-
-
-#fig = plot_fig(x, y)
-
-
-
-
-# # Plot
-# fig_temp = go.Figure(go.Histogram2d(
-#         x = t_new,
-#         y = d_temp_new,
-#         histnorm='percent',
-#         colorscale='turbo',
-#         autobinx=False,
-#         xbins= dict(size= .264),
-#         autobiny=False,
-#         ybins= dict(size = .264)
-#         ))
-
-
-# fig_temp.update_xaxes(tickangle=-90,
-#                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-#                   ticktext = t_text
-#                   )
-# fig_temp.update_layout(height=400, width=900, title_text="Temperature",
-#                        xaxis_title='Time',
-#                     yaxis_title='Temperature (C)')
-
 
 
 

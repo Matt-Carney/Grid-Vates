@@ -133,10 +133,10 @@ def velocity_temp__data(mu = 20, sigma=1, decay=1.0, size=1000, type='temp'):
 
 
 
-def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_size=1000,
-                                      temp_range=6, trend=0.02, 
-                                      initial_uncertainty=0.5, 
-                                      uncertainty_growth=0.02, 
+def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
+                                      temp_range=6, 
+                                      initial_std_dev=1, 
+                                      uncertainty_growth=0.01, 
                                       random_walk_scale=0.1,
                                       type='temp'):
     
@@ -146,11 +146,9 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_si
     Parameters:
     n_steps (int): Number of time steps.
     mean (float): Mean temperature or velocity.
-    std_dev (float): Standard deviation of temperature or velocity.
     sample_size (int): Number of samples per time step.
     temp_range (float): Range of temperature fluctuation.
-    trend (float): Linear trend coefficient.
-    initial_uncertainty (float): Initial uncertainty in measurements.
+    inital_std_dev (float): Initial standard deviation of temperature or velocity.
     uncertainty_growth (float): Growth rate of uncertainty over time.
     random_walk_scale (float): Scale of random walk component.
     type (str): 'temp' for temperature or 'vel' for velocity data.
@@ -196,9 +194,7 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_si
     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
     
     # Base temperature pattern
-    high = mean + 3
     daily_pattern = np.sin(x) * temp_range / 2
-    #trend_component = trend * np.arange(n_steps)
     y = mean + daily_pattern 
     
     # Random walk component
@@ -208,15 +204,9 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_si
     # Generate probabilistic data with truncated normal distribution
     data = []
     for i in range(n_steps):
-        uncertainty = initial_uncertainty + uncertainty_growth * i
-        total_std = np.sqrt(std_dev**2 + uncertainty**2)
-        
-        # if type == 'temp':
-        #     a, b = (min_temp - y[i]) / total_std, (max_temp - y[i]) / total_std
-        # elif type == 'vel':
-        #     a, b = (0 - y[i]) / total_std, np.inf
-        
-
+        #uncertainty = initial_uncertainty + uncertainty_growth * i
+        total_std = np.sqrt(initial_std_dev**2 + (uncertainty_growth * i)**2)
+    
         if type == 'temp':
             a, b = -3, 3  # ±3 standard deviations for temperature
         elif type == 'vel':
@@ -226,10 +216,10 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_si
         samples = truncnorm.rvs(a, b, loc=y[i], scale=total_std, size=sample_size)
         data.append(samples)
 
-    # Reshape data to match the expected input format for plot_fig
+    # Format data for output
     x_plot = np.repeat(x, sample_size)
     y_plot = np.array(data)
-    #y_plot = np.array(data).flatten()
+    #y_plot = np.array(data).flatten() # Reshape data in plot_fig
     
     return x_plot, y_plot
 
