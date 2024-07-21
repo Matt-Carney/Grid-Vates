@@ -7,6 +7,18 @@ from scipy.stats import truncnorm
 import plotly.graph_objects as go
 
 def plot_fig(x, y):
+    """
+    Creates a 2D histogram plot of temperature or velocity data over time.
+
+    Parameters:
+    x (np.array): Time values, repeated for each corresponding y value.
+    y (np.array): Temperature or velocity values, flattened 2D array.
+
+    Returns:
+    plotly.graph_objects.Figure: A 2D histogram figure object.
+    
+    """
+    
     # Plot
     t_text = ['Day 0 00:00',
           'Day 0 12:00',
@@ -128,6 +140,29 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_si
                                       random_walk_scale=0.1,
                                       type='temp'):
     
+    """
+    Generates synthetic temperature or velocity data with a truncated normal distribution.
+
+    Parameters:
+    n_steps (int): Number of time steps.
+    mean (float): Mean temperature or velocity.
+    std_dev (float): Standard deviation of temperature or velocity.
+    sample_size (int): Number of samples per time step.
+    temp_range (float): Range of temperature fluctuation.
+    trend (float): Linear trend coefficient.
+    initial_uncertainty (float): Initial uncertainty in measurements.
+    uncertainty_growth (float): Growth rate of uncertainty over time.
+    random_walk_scale (float): Scale of random walk component.
+    type (str): 'temp' for temperature or 'vel' for velocity data.
+
+    Returns:
+    tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data.
+    """
+
+
+
+
+
     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
     
     # Base temperature pattern
