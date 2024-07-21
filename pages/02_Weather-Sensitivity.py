@@ -91,7 +91,7 @@ x_temp, y_temp = generate_synthetic_temp_truncated(mean=temp_mean,
 
 
 
-fig_temp = plot_fig(x=x_temp, y=y_temp)
+fig_temp = plot_fig(x=x_temp, y=y_temp, title = 'Temperature')
 
 
 

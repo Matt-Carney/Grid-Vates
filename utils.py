@@ -6,7 +6,7 @@ from scipy.stats import norm
 from scipy.stats import truncnorm
 import plotly.graph_objects as go
 
-def plot_fig(x, y):
+def plot_fig(x, y, title = 'Placeholder', x_axis_title = 'Time', y_axis_title = 'Temperature (C)'):
     """
     Creates a 2D histogram plot of temperature or velocity data over time.
 
@@ -50,9 +50,9 @@ def plot_fig(x, y):
                     tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
                     ticktext = t_text
                     )
-    fig.update_layout(height=400, width=900, title_text="Temperature",
-                        xaxis_title='Time',
-                        yaxis_title='Temperature (C)')
+    fig.update_layout(height=400, width=900, title_text=title,
+                        xaxis_title=x_axis_title,
+                        yaxis_title=y_axis_title)
 
     #fig_temp.show()
     return fig
@@ -155,20 +155,51 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15, std_dev=2, sample_si
     random_walk_scale (float): Scale of random walk component.
     type (str): 'temp' for temperature or 'vel' for velocity data.
 
+
+    1.) Time steps and repetition:
+
+    There are 120 time steps (n_steps = 120).
+    Each time step has 1000 samples (sample_size = 1000).
+    np.repeat(x, sample_size) repeats each time value 1000 times in place.
+    This results in an array of 120,000 elements (120 * 1000).
+
+
+    2.) Structure of x_plot:
+
+    [t1, t1, t1, ...(1000 times), t2, t2, t2, ...(1000 times), ..., t120, t120, t120, ...(1000 times)]
+    Total length: 120,000
+
+
+    3.) Structure of y_plot before flattening:
+
+    2D array with shape (120, 1000)
+    Each row corresponds to a time step
+    Each column in a row is a sample for that time step
+
+
+    4.) Flattening y_plot (in plotting function):
+
+    When we flatten y_plot, it concatenates all rows end-to-end.
+    Result: [y1_1, y1_2, ..., y1_1000, y2_1, y2_2, ..., y2_1000, ..., y120_1, y120_2, ..., y120_1000]
+    Total length: 120,000
+
+
+    5.) Alignment of x_plot and flattened y_plot:
+
+    Each x value in x_plot correctly corresponds to its y value in the flattened y_plot.
+    For example, all 1000 samples for the first time step (t1) align with the first 1000 y values.    
+        
     Returns:
     tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data.
     """
 
-
-
-
-
     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
     
     # Base temperature pattern
+    high = mean + 3
     daily_pattern = np.sin(x) * temp_range / 2
-    trend_component = trend * np.arange(n_steps)
-    y = mean + daily_pattern + trend_component
+    #trend_component = trend * np.arange(n_steps)
+    y = mean + daily_pattern 
     
     # Random walk component
     random_walk = np.cumsum(np.random.normal(0, random_walk_scale, n_steps))
