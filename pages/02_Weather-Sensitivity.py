@@ -77,7 +77,7 @@ dir_kap = st.sidebar.slider('Kappa', 0.5, 10.0, 2.0)
 
 ### Temperature
 x_temp, y_temp = generate_synthetic_temp_truncated(mean=temp_mean,
-                                         std_dev=temp_init_std_dev, 
+                                         initial_std_devv=temp_init_std_dev, 
                                          uncertainty_growth=temp_uncertainty_growth,
                                          type='temp')
 
