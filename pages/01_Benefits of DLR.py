@@ -39,7 +39,10 @@ st.markdown("By allowing transmission lines to operate closer to their true capa
 st.write('')
 
 st.subheader('How are they calculated?')
-st.markdown("The ampacity (ie. max current or 'Rating') is calculated from the IEEE Standard 738-2006 - Steady State Heat Balance[4]")
+st.markdown("During actual operation, several potential failure mechanisms for transmission lines need to be considered,\
+            such as reduced clearance due to thermal expansion and sag, wind-induced swinging and thermal limits.\
+            For simplicity, only the thermal limit will be considered here, and the ampacity (ie. max current or 'Rating')\
+            is calculated from the IEEE Standard 738-2006 - Steady State Heat Balance[4]")
 
 st.write('')
 IEEE_SS = Image.open('images/IEEE_Steady_State_DLR.png')
