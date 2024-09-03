@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
-from utils import DLR, plot_fig, generate_synthetic_temp_truncated, generate_synthetic_wind_direction,generate_synthetic_solar_irradiance, generate_DLR
+from utils import DLR, plot_fig,generate_synthetic_temp_truncated, generate_synthetic_wind_direction,generate_synthetic_solar_irradiance, generate_DLR, process_plot_timestep_stats
 
 st.title('Weather - Sensitivity')
 st.markdown('Experiemnt with the weather forecast variables on the left and observe how it changes the DLR forecast!')
@@ -80,7 +80,11 @@ dir_kappa = st.sidebar.slider('Kappa', 0.5, 20.0, 15.0)
 dir_shift_prob = st.sidebar.slider('Shift Probability', 0.0, 1.0, 0.1)
 dir_max_shift = st.sidebar.slider('Max Shift (deg)', 0.0, 180.0, 15.0)
 
-
+# Wind Direction
+with st.sidebar:
+    st.write("DLR Stats Fig")
+time_step = st.sidebar.slider("Select Time Step", 0, 119, 0)
+early_stopping = st.sidebar.checkbox("Enable Early Stopping", value=True)
 
 ### Temperature
 x_temp, y_temp = generate_synthetic_temp_truncated(mean=temp_mean,
@@ -122,6 +126,11 @@ fig_dir = plot_fig(x=x_dir, y=y_dir, title = 'Wind Direction', y_axis_title = 'W
 x_DLR, y_DLR = generate_DLR(y_temp=y_temp, y_sol=y_sol, y_vel=y_vel, y_dir=y_dir, n_samples=1000, n_steps=120)
 fig_DLR = plot_fig(x=x_DLR, y=y_DLR, title = 'DLR', y_axis_title = 'Rating (Amps)')
 # num_rand = 1000
+
+### DLR Monte Carlo
+fig_mc, stop_index = process_plot_timestep_stats(y_DLR, tolerance=0.01, consecutive_stable=50, time_step=time_step, early_stopping=early_stopping)
+
+
 
 # DLR_data = np.zeros((1000,120))
 
@@ -179,4 +188,6 @@ with st.expander("Expand for Wind Velocity"):
     st.plotly_chart(fig_vel)
 with st.expander("Expand for Wind Direction"):
     st.plotly_chart(fig_dir)
+with st.expander("Expand for DLR Timestep Monte Carlo"):
+    st.plotly_chart(fig_mc)
 

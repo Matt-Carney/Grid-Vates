@@ -6,6 +6,8 @@ from scipy.stats import norm
 from scipy.stats import truncnorm
 import plotly.graph_objects as go
 from scipy.stats import vonmises
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Temperature (C)', 
@@ -303,7 +305,86 @@ def generate_DLR(y_temp, y_sol, y_vel, y_dir, n_samples=1000, n_steps=120):
 
     return x_plot, y_plot
 
+#process_plot_timestep_stats
 
+def process_plot_timestep_stats(y_plot, tolerance=0.01, consecutive_stable=10, time_step=0, early_stopping=True):
+    """
+    Process pre-randomized y_plot data for a single time step, calculate percentiles, and create a Plotly plot with optional early stopping.
+
+    Parameters:
+    y_plot (np.array): Input data array from random_sample_and_process
+    tolerance (float): Tolerance for early stopping (default: 0.01)
+    consecutive_stable (int): Number of consecutive stable points required (default: 10)
+    time_step (int): Time step to analyze (default: 0)
+    early_stopping (bool): Whether to use early stopping (default: True)
+
+    Returns:
+    plotly.graph_objects.Figure: Plotly figure object
+    int: Number of data points processed before early stopping (or total data points if no early stopping)
+    """
+    # Reshape y_plot and select the specified time step
+    n_samples = y_plot.size // 120
+    y_reshaped = y_plot.reshape(120, n_samples)
+    y_timestep = y_reshaped[time_step]
+
+    # Initialize arrays to store statistics
+    percentile_25 = []
+    percentile_50 = []
+    percentile_75 = []
+
+    # Initialize early stopping variables
+    stable_count = 0
+    stop_index = n_samples
+
+    for i in range(1, n_samples + 1):
+        # Calculate percentiles for the current subset of data
+        p25 = np.percentile(y_timestep[:i], 25)
+        p50 = np.percentile(y_timestep[:i], 50)
+        p75 = np.percentile(y_timestep[:i], 75)
+
+        percentile_25.append(p25)
+        percentile_50.append(p50)
+        percentile_75.append(p75)
+
+        # Check for early stopping if enabled
+        if early_stopping and i > 1:
+            changes = [
+                abs(percentile_25[-1] - percentile_25[-2]) / percentile_25[-2],
+                abs(percentile_50[-1] - percentile_50[-2]) / percentile_50[-2],
+                abs(percentile_75[-1] - percentile_75[-2]) / percentile_75[-2]
+            ]
+            
+            if all(change <= tolerance for change in changes):
+                stable_count += 1
+            else:
+                stable_count = 0
+
+            if stable_count >= consecutive_stable:
+                stop_index = i
+                break
+
+    # Create x-axis array (number of data points)
+    x_axis = np.arange(1, stop_index + 1)
+
+    # Create Plotly figure
+    fig = go.Figure()
+
+    # Add traces
+    fig.add_trace(go.Scatter(x=x_axis, y=percentile_25[:stop_index], mode='lines', name='25th Percentile'))
+    fig.add_trace(go.Scatter(x=x_axis, y=percentile_50[:stop_index], mode='lines', name='50th Percentile'))
+    fig.add_trace(go.Scatter(x=x_axis, y=percentile_75[:stop_index], mode='lines', name='75th Percentile'))
+
+    # Update layout
+    early_stop_status = "enabled" if early_stopping else "disabled"
+    fig.update_layout(
+        title=f'Percentile Analysis of Y Plot Data for Time Step {time_step} (Early Stopping: {early_stop_status})',
+        xaxis_title='Number of Data Points',
+        yaxis_title='Percentile Values',
+        legend_title='Metrics',
+        hovermode="x unified"
+    )
+
+    return fig, stop_index
 
 class DLR:
     """
