@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from scipy.stats import truncnorm
 import plotly.graph_objects as go
+from scipy.stats import vonmises
 
 def plot_fig(x, y, title = 'Placeholder', x_axis_title = 'Time', y_axis_title = 'Temperature (C)'):
     """
@@ -205,6 +206,9 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
     data = []
     for i in range(n_steps):
         #uncertainty = initial_uncertainty + uncertainty_growth * i
+        # Uncertainty/error propagation, used when combining two independent sources of uncertainty
+        # Simply adding could over estimate the total error
+        # Think pythagorean theorem
         total_std = np.sqrt(initial_std_dev**2 + (uncertainty_growth * i)**2)
     
         if type == 'temp':
@@ -226,17 +230,50 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
 
 
 
+def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, kappa=1, 
+                                      shift_prob=0.1, max_shift=90):
+    """
+    Generates synthetic wind direction data.
 
+    Parameters:
+    n_steps (int): Number of time steps.
+    sample_size (int): Number of samples per time step.
+    kappa (float): Concentration parameter for von Mises distribution.
+    shift_prob (float): Probability of a sudden shift in wind direction.
+    max_shift (float): Maximum amount of sudden shift (in degrees).
 
-
-
-
-
-
-
-
-
-
+    Returns:
+    tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data.
+    """
+    
+    # Convert max_shift from degrees to radians
+    max_shift_rad = max_shift * np.pi / 180
+    
+    x = np.linspace(0, 2*np.pi, n_steps)
+    
+    # Initialize with a random direction
+    current_direction = np.random.uniform(0, 2*np.pi)
+    
+    data = []
+    for _ in range(n_steps):
+        # Decide if there's a sudden shift
+        if np.random.random() < shift_prob:
+            shift = np.random.uniform(-max_shift_rad, max_shift_rad)
+            current_direction = (current_direction + shift) % (2*np.pi)
+        
+        # Generate samples from von Mises distribution
+        samples = vonmises.rvs(kappa, loc=current_direction, size=sample_size)
+        
+        # Ensure all values are in [0, 2π)
+        samples = samples % (2*np.pi)
+        
+        data.append(samples)
+    
+    # Format data for output
+    x_plot = np.repeat(x, sample_size)
+    y_plot = np.array(data)
+    
+    return x_plot, y_plot
 
 
 
@@ -250,7 +287,7 @@ def solar_irr_data(sol_irr = 1000, sol_perc = 0.5, decay = 1.0):
     size = 1000
     dists = np.zeros((size, int(len(x))))
 
-    irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0.97,\
+    irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0-.97,\
                     1.00, 0.98, 0.90, 0.77, 0.62, 0.47, 0.39, 0.00, 0.00, 0.00, 0.00, 0.00]
 
     irr_perc = np.array(irr_perc_day*5)
