@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
-from utils import DLR, plot_fig, generate_synthetic_temp_truncated, generate_synthetic_wind_direction,generate_synthetic_solar_irradiance, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
+from utils import DLR, plot_fig, generate_synthetic_temp_truncated, generate_synthetic_wind_direction,generate_synthetic_solar_irradiance, generate_DLR
 
 st.title('Weather - Sensitivity')
 st.markdown('Experiemnt with the weather forecast variables on the left and observe how it changes the DLR forecast!')
@@ -91,55 +91,15 @@ x_temp, y_temp = generate_synthetic_temp_truncated(mean=temp_mean,
 fig_temp = plot_fig(x=x_temp, y=y_temp, title = 'Temperature', y_axis_title = 'Temperature (C)')
 
 
-
 # ### Solar Irradiance
 x_sol, y_sol = generate_synthetic_solar_irradiance(sol_irr=sol_irr,
                                                    cloud_cover=sol_cloud_cover,
                                                    cloud_cover_init_std=sol_cloud_cover_std_dev,
                                                    cloud_cover_uncertainty_growth=sol_uncertainty_growth)  
 
-#x_sol, y_sol = generate_synthetic_solar_irradiance()
 
 fig_sol = plot_fig(x=x_sol, y=y_sol, title = 'Solar Irradiance',
                    y_axis_title = 'Solar Irradiance (W/m^2)')
-
-# # Generate Data
-# d_sol, t = solar_irr_data(sol_irr=sol_irr, sol_perc=sol_perc, decay=sol_decay)
-# d_sol_new = d_sol.reshape(-1)
-
-# # Plot
-# my_colorsc=[[0.0, 'rgb(231, 236, 239)'],
-#             [0.1, 'rgb(70, 107, 227)'],
-#             [0.2, 'rgb(62, 155, 254)'],
-#             [0.3, 'rgb(24, 214, 203)'], 
-#             [0.4, 'rgb(70, 247, 131)'],
-#             [0.5, 'rgb(162, 252, 60)'],
-#             [0.6, 'rgb(225, 220, 55)'], 
-#             [0.7, 'rgb(253, 165, 49)'],
-#             [0.8, 'rgb(239, 90, 17)'], 
-#             [0.9, 'rgb(196, 37, 2)'],
-#             [1, 'rgb(122, 4, 2)']]
-
-# fig_sol = go.Figure(go.Histogram2d(
-#         x = t,
-#         y = d_sol_new,
-#         histnorm='percent',
-#         colorscale='turbo',
-#         autobinx=False,
-#         xbins= dict(size= .264),
-#         autobiny=False,
-#         ybins= dict(size = 40)
-#         ))
-
-# fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance",
-#                       xaxis_title='Time',
-#                     yaxis_title='Heat Flux (W/m^2)',)
-
-# fig_sol.update_xaxes(tickangle=-90,
-#                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-#                   ticktext = t_text
-#                   )
-
 
 
 ### Wind Velocity
@@ -151,85 +111,16 @@ x_vel, y_vel = generate_synthetic_temp_truncated(mean=vel_mean,
 fig_vel = plot_fig(x=x_vel, y=y_vel, title = 'Wind Velocity', y_axis_title = 'Wind Velocity (m/s)')
 
 
-# Generate Data
-#d_vel, t = velocity_temp__data(mu=vel_mean, sigma=vel_sd, decay=vel_decay, type='vel')
-#t_new = t*1000
-#d_vel_new = d_vel.reshape(-1)
-
-# # Plot
-# fig_vel = go.Figure(go.Histogram2d(
-#         x = t_new,
-#         y = d_vel_new,
-#         histnorm='percent',
-#         colorscale='turbo',
-#         autobinx=False,
-#         xbins= dict(size= .264),
-#         autobiny=False,
-#         ybins= dict(size = .264)
-#         ))
-
-
-# fig_vel.update_layout(height=400, width=900, title_text="Wind Velocity",
-#                                         xaxis_title='Time',
-#                   yaxis_title='Velocity (m/s)')
-
-# fig_vel.update_xaxes(tickangle=-90,
-#                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-#                   ticktext = t_text)
-
 
 ### Wind Direction
 x_dir, y_dir = generate_synthetic_wind_direction(start_direction=dir_init,kappa = dir_kappa, shift_prob = dir_shift_prob, max_shift = dir_max_shift)
 fig_dir = plot_fig(x=x_dir, y=y_dir, title = 'Wind Direction', y_axis_title = 'Wind Direction (m/s)')
-# # Genearte Data
-# dir_temp_decay = np.linspace(0.0, dir_decay, 5)
-# df_pol_0, d_0 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[0])
-# df_pol_1, d_1 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[1])
-# df_pol_2, d_2 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[2])
-# df_pol_3, d_3 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[3])
-# df_pol_4, d_4 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[4])
-
-# x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
-# d_dir = np.zeros((1000, int(len(x)))) # 1000, 120
-
-# # For DLR Calc
-# for i in range(d_dir.shape[1]):
-#     if i <24:
-#         d_dir[:,i] = d_0
-#     elif i >= 24 & i < 48:
-#         d_dir[:,i] = d_1
-#     elif i >= 48 & i < 72:
-#         d_dir[:,i] = d_2
-#     elif i >= 72 & i < 96:
-#         d_dir[:,i] = d_3
-#     elif i >= 96:
-#         d_dir[:,i] = d_4
-
-# d_dir_new = d_dir.reshape(-1)
-
-# # Plot
-# fig_wind = make_subplots(rows=1, cols=5, specs=[[{'type': 'polar'},
-#                                                 {'type': 'polar'},
-#                                                 {'type': 'polar'},
-#                                                 {'type': 'polar'},
-#                                                 {'type': 'polar'}]])
-
-# fig_wind.update_layout(height=280, width=900, title_text="Wind Direction",
-#                        xaxis_title='Time',
-#                     yaxis_title='Degrees',)
-
-# max_step = df_pol_0['Percent'].max()+0.05
-# fig_wind.update_polars(radialaxis = dict(range=[0, max_step],nticks=5),
-#                        angularaxis = dict(direction='clockwise'))
-
-# fig_wind.add_trace(go.Barpolar(r=df_pol_0['Percent'], theta=df_pol_0['wind_dir'], name='Day 1', showlegend=True), row=1, col=1)
-# fig_wind.add_trace(go.Barpolar(r=df_pol_1['Percent'], theta=df_pol_1['wind_dir'], name='Day 2', showlegend=True), row=1, col=2)
-# fig_wind.add_trace(go.Barpolar(r=df_pol_2['Percent'], theta=df_pol_2['wind_dir'], name='Day 3', showlegend=True), row=1, col=3)
-# fig_wind.add_trace(go.Barpolar(r=df_pol_3['Percent'], theta=df_pol_3['wind_dir'], name='Day 4', showlegend=True), row=1, col=4)
-# fig_wind.add_trace(go.Barpolar(r=df_pol_4['Percent'], theta=df_pol_4['wind_dir'], name='Day 5', showlegend=True), row=1, col=5)
 
 
 
+### DLR
+x_DLR, y_DLR = generate_DLR(y_temp=y_temp, y_sol=y_sol, y_vel=y_vel, y_dir=y_dir, n_samples=1000, n_steps=120)
+fig_DLR = plot_fig(x=x_DLR, y=y_DLR, title = 'DLR', y_axis_title = 'Rating (Amps)')
 # num_rand = 1000
 
 # DLR_data = np.zeros((1000,120))
@@ -241,8 +132,6 @@ fig_dir = plot_fig(x=x_dir, y=y_dir, title = 'Wind Direction', y_axis_title = 'W
 #         rand_dir = np.random.choice(d_dir[:,i])
 #         rand_temp = np.random.choice(y_temp[:,i])
 #         rand_sol = np.random.choice(d_sol[:,i])
-#         #a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
-#         #d.append(a.ampacity())
 #         _dlr = DLR(wind_speed=rand_vel, wind_angle=rand_dir, ambient_temp=rand_temp, eff_rad_heat_flux=rand_sol)
 #         DLR_temp = _dlr.ampacity()
 #         DLR_list.append(DLR_temp)
@@ -273,7 +162,7 @@ fig_dir = plot_fig(x=x_dir, y=y_dir, title = 'Wind Direction', y_axis_title = 'W
 #                     yaxis_title='Rating (Amps)',)
 
 # # Plot All Figures
-# st.plotly_chart(fig_DLR)
+st.plotly_chart(fig_DLR)
 hide = """
 <style>
 ul.streamlit-expander {

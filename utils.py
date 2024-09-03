@@ -7,64 +7,6 @@ from scipy.stats import truncnorm
 import plotly.graph_objects as go
 from scipy.stats import vonmises
 
-# def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Temperature (C)', y_min=None, y_max=None):
-#     """
-#     Creates a 2D histogram plot of temperature or velocity data over time.
-
-#     Parameters:
-#     x (np.array): Time values, repeated for each corresponding y value.
-#     y (np.array): Temperature or velocity values, flattened 2D array.
-#     title (str): Title of the plot.
-#     x_axis_title (str): Title for the x-axis.
-#     y_axis_title (str): Title for the y-axis.
-#     y_min (float): Optional minimum y-axis limit.
-#     y_max (float): Optional maximum y-axis limit.
-
-#     Returns:
-#     plotly.graph_objects.Figure: A 2D histogram figure object.
-#     """
-    
-#     # Plot
-#     t_text = ['Day 0 00:00',
-#           'Day 0 12:00',
-#           'Day 1 00:00',
-#           'Day 1 12:00',
-#           'Day 2 00:00',
-#           'Day 2 12:00',
-#           'Day 3 00:00',
-#           'Day 3 12:00',
-#           'Day 4 00:00',
-#           'Day 4 12:00',
-#           'Day 5 00:00']
-
-#     y = y.flatten()
-    
-#     fig = go.Figure(go.Histogram2d(
-#             x = x,
-#             y = y,
-#             histnorm='percent',
-#             colorscale='turbo',
-#             autobinx=False,
-#             xbins= dict(size= .264),
-#             autobiny=False,
-#             ybins= dict(size = .264)
-#             ))
-
-#     fig.update_xaxes(tickangle=-90,
-#                     tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-#                     ticktext = t_text
-#                     )
-    
-#     # Update y-axis range if y_min and y_max are provided
-#     if y_min is not None and y_max is not None:
-#         fig.update_yaxes(range=[y_min, y_max])
-
-#     fig.update_layout(height=400, width=900, title_text=title,
-#                         xaxis_title=x_axis_title,
-#                         yaxis_title=y_axis_title)
-
-#     return fig
-
 
 def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Temperature (C)', 
              y_min=None, y_max=None, n_bins_x=120, n_bins_y=60):
@@ -121,79 +63,6 @@ def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Tempe
                       yaxis_title=y_axis_title)
 
     return fig
-
-def temp_data(mu=20, delta=2, steps=10):
-    high = mu + delta
-    low = mu - delta
-    amp = (high-low)/2
-    ave = (high+low)/2
-    temp = np.sin(steps) * amp + ave
-    return temp
-
-def gen_uniform(low=0, high=1.0, size=10000):
-    return np.random.uniform(low=low, high=high, size=size)
-
-def gen_normal(mu=5, sigma=0.1, num=10000):
-    return np.random.normal(loc=mu, scale=sigma, size=num)
-
-
-def velocity_temp__data(mu = 20, sigma=1, decay=1.0, size=1000, type='temp'):
-    x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
-    time_steps = int(len(x))
-
-
-    dists = np.zeros((size, int(time_steps))) 
-
-    high = mu+3
-    low = mu-3
-    amp = (high-low)/2
-    ave = (high+low)/2
-    vals = np.sin(x) * amp + ave
-
-    #norm_init = gen_normal(mu, sigma, size)
-    #unif_bound = norm.ppf([0.1, 0.99], loc=mu, scale=sigma)
-    #unif_init = gen_uniform(unif_bound[0], unif_bound[1], size)
-
-    nums = []
-    for i in range(time_steps):
-        #if type == 'sine':
-        mu = vals[i]
-        
-        decay_per = (i)/time_steps
-        num_uniform = int(decay_per*size*decay)
-        num_normal = size - num_uniform
-
-        #if type == 'sine':
-        np.random.seed(123)
-        norm_0 = gen_normal(mu, sigma, num_normal)
-        if type == 'temp':
-            norm_0 = norm_0
-        elif type == 'vel':
-            norm_0 = np.abs(norm_0)
-        unif_bound = norm.ppf([0.001, 0.9999], loc=mu, scale=sigma)
-        
-        if type == 'temp':
-            unif_0 = gen_uniform(unif_bound[0], unif_bound[1], num_uniform)
-        elif type == 'vel':
-            unif_0 = gen_uniform(max(unif_bound[0], 0), unif_bound[1], num_uniform)
-        
-        #if rand == 'index':
-        norm_ = norm_0[0:num_normal]
-        unif_ = unif_0[0:num_uniform]
-        #elif rand == 'choice':
-        #    norm_ = np.random.choice(norm_0, num_normal, replace=False)
-        #    unif_ = np.random.choice(unif_0, num_uniform, replace=False)
-        samples = list(norm_) + list(unif_)
-        dists[:,i] = samples 
-        #dists[:,i] = norm_init
-        dists = np.array(dists)
-        
-        nums.append([num_normal, num_uniform])
-        
-    #dists[dists<=0] = 0.0
-    return dists, list(x)
-
-
 
 
 def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
@@ -391,147 +260,49 @@ def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1
 
 
 
+def generate_DLR(y_temp, y_sol, y_vel, y_dir, n_samples=1000, n_steps=120):
+    """
+    Randomly sample from each dataset, process with DLR, and format for plotting.
 
+    Parameters:
+    y_temp, y_sol, y_vel, y_dir (np.array): Input data arrays
+    n_samples (int): Number of samples to take for each time step
+    x_time (np.array): Array of time values (assuming 120 unique time points)
 
-
-
-# def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1000, 
-#                                         cloud_cover=0.5, cloud_cover_init_std=0.1, 
-#                                         cloud_cover_uncertainty_growth=0.01):
-#     """
-#     Generates synthetic solar irradiance data based on specified requirements.
-
-#     Parameters:
-#     n_steps (int): Number of time steps.
-#     sample_size (int): Number of samples per time step.
-#     sol_irr (float): Maximum solar irradiance (W/m^2)
-#     cloud_cover (float): Mean cloud cover (0-1)
-#     cloud_cover_init_std (float): Initial standard deviation of cloud cover
-#     cloud_cover_uncertainty_growth (float): Growth rate of cloud cover uncertainty
-
-#     Returns:
-#     tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of irradiance data.
-#     """
-#     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
-#     y_plot = np.zeros((n_steps, sample_size))
-
-#     # Define the irradiance percentage pattern
-#     irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0.97,
-#                     1.00, 0.98, 0.90, 0.77, 0.62, 0.47, 0.39, 0.00, 0.00, 0.00, 0.00, 0.00]
-#     irr_perc = np.tile(irr_perc_day, (n_steps // 24) + 1)[:n_steps]
-
-#     for i in range(n_steps):
-#         # Calculate cloud cover standard deviation
-#         total_std = np.sqrt(cloud_cover_init_std**2 + (cloud_cover_uncertainty_growth * i)**2)
-        
-#         # Generate cloud cover from truncated normal distribution
-#         a, b = (0 - cloud_cover) / total_std, (1 - cloud_cover) / total_std
-#         cloud_cover_sample = truncnorm.rvs(a, b, loc=cloud_cover, scale=total_std, size=sample_size)
-#         cloud_cover_sample = np.clip(cloud_cover_sample, 0, 1)  # Ensure values are between 0 and 1
-
-#         # Calculate clear sky irradiance
-#         clear_sky_irr = sol_irr * irr_perc[i]
-
-#         # Calculate direct and diffuse components
-#         direct = clear_sky_irr * (1 - cloud_cover_sample)
-#         diffuse = clear_sky_irr * cloud_cover_sample * 0.5  # Assume 50% of blocked light becomes diffuse
-
-#         # Combine components
-#         total_irradiance = direct + diffuse
-
-#         # Ensure non-negative values and cap at sol_irr
-#         y_plot[i] = np.clip(total_irradiance, 0, sol_irr)
-
-#     # Create x_plot by repeating x values
-#     x_plot = np.repeat(x, sample_size)
-
-#     return x_plot, y_plot
-
-
-
-
-def solar_irr_data(sol_irr = 1000, sol_perc = 0.5, decay = 1.0):
-    x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
-    size = 1000
-    dists = np.zeros((size, int(len(x))))
-
-    irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0.97,\
-                    1.00, 0.98, 0.90, 0.77, 0.62, 0.47, 0.39, 0.00, 0.00, 0.00, 0.00, 0.00]
-
-    irr_perc = np.array(irr_perc_day*5)
-
-    red = 1.0 * (1.0-(.75* sol_perc))
-
-    for i, val in enumerate(irr_perc):
-        if val != 0.00:
-            ideal = [val * sol_irr * red]
-            #ideals = np.random.normal(ideal, scale=10, size=1000)
-            ideals = 1000 * ideal
-
-            decay_per = (i)/int(len(x))
-            num_uniform = int(decay_per * size * decay)
-            num_ideal = size - num_uniform
-            
-            ideal_ = np.random.choice(ideals, num_ideal, replace=True)
-            
-            #unif_low = val*sol_irr*.25
-            #unif_high = val*sol_irr*1
-            np.random.seed(123)
-            #unif = np.random.uniform(low=unif_low, high=unif_high, size=size)
-            unif = np.random.normal(loc=ideal, scale=100, size=size)
-            np.random.seed(123)
-            unif_ = np.random.choice(unif, num_uniform, replace=True)
-
-            #samples = unif
-            #samples = np.concatenate(ideal_, unif_)
-            samples = list(ideal_) + list(unif_) #Clean this up
-            samples = np.array(samples)
-            samples[samples<0] = 0.0
-            dists[:,i] = samples 
-
-    t = list(x)*1000
-
-
-    return dists, t
-
-
-
-
-
-
-def wind_direction_data(deg = 45, kap = 2, size = 1000, perc_unif = 0.5):
-    rad = deg * (np.pi/180)
-
-    np.random.seed(123)
-    vm_init = np.random.vonmises(mu=rad, kappa=kap, size=size) # -pi to pi
-    unif_init = gen_uniform(0, 360, size) # 0 - 360 degrees
-
-    num_unif = int(size*perc_unif)
-    num_vm = size - num_unif
-
-    vm = vm_init[0:num_vm]
-    unif = unif_init[0:num_unif]
-
-    vm_2pi = np.mod(vm, 2*np.pi) # 0 - 2 pi
-    vm_deg = vm_2pi * (180/np.pi) # 0 - 360 degrees
+    Returns:
+    tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of processed data
+    """
     
-    agg_dist = np.concatenate((vm_deg, unif))
-    #agg_dist = vm_deg
+    x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
+    
+    # Reshape input data to (120, 1000) if not already in this shape
+    datasets = [y_temp, y_sol, y_vel, y_dir]
+    datasets = [data.reshape(120, 1000) if data.shape != (120, 1000) else data for data in datasets]
 
-    pol_bins = np.linspace(0,360,17)
-    bin_val = np.digitize(agg_dist, bins= pol_bins)
+    # Initialize output array
+    output = np.zeros((120, n_samples))
 
-    pol_val = []
-    for i in bin_val:
-        temp = pol_bins[i]
-        pol_val.append(temp)
+    # Process each time step
+    for i in range(120):
+        for j in range(n_samples):
+            # Randomly sample one value from each dataset for this time step
+            temp = np.random.choice(datasets[0][i])
+            sol = np.random.choice(datasets[1][i])
+            vel = np.random.choice(datasets[2][i])
+            dir = np.random.choice(datasets[3][i])
 
+            # Instantiate DLR and calculate ampacity
+            dlr_instance = DLR(wind_speed=vel, wind_angle=dir, ambient_temp=temp, eff_rad_heat_flux=sol)  # Assuming these are the correct parameters for DLR
+            output[i, j] = dlr_instance.ampacity()
 
-    df_pol = pd.DataFrame({'wind_dir': pol_val})
-    df_pol = df_pol.groupby(['wind_dir']).size().reset_index().rename(columns={0: 'count'})
-    df_pol['Percent'] = df_pol['count']/df_pol['count'].sum()
+    # Format x_plot
+    x_plot = np.repeat(x, n_samples)
 
-    return df_pol, agg_dist
+    # Flatten y_plot for consistency with original format
+    y_plot = output.flatten()
+
+    return x_plot, y_plot
+
 
 
 class DLR:
@@ -646,15 +417,12 @@ class DLR:
         
 
 
-a = DLR(wind_speed=10, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
-a.ampacity()
+#a = DLR(wind_speed=10, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
+#a.ampacity()
 
-
-
-
-d = []
-for i in range(1000):
-    a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
-    d.append(a.ampacity())
+#d = []
+#for i in range(1000):
+#    a = DLR(wind_speed=5, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
+#    d.append(a.ampacity())
 
 
