@@ -7,33 +7,94 @@ from scipy.stats import truncnorm
 import plotly.graph_objects as go
 from scipy.stats import vonmises
 
-def plot_fig(x, y, title = 'Placeholder', x_axis_title = 'Time', y_axis_title = 'Temperature (C)'):
+# def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Temperature (C)', y_min=None, y_max=None):
+#     """
+#     Creates a 2D histogram plot of temperature or velocity data over time.
+
+#     Parameters:
+#     x (np.array): Time values, repeated for each corresponding y value.
+#     y (np.array): Temperature or velocity values, flattened 2D array.
+#     title (str): Title of the plot.
+#     x_axis_title (str): Title for the x-axis.
+#     y_axis_title (str): Title for the y-axis.
+#     y_min (float): Optional minimum y-axis limit.
+#     y_max (float): Optional maximum y-axis limit.
+
+#     Returns:
+#     plotly.graph_objects.Figure: A 2D histogram figure object.
+#     """
+    
+#     # Plot
+#     t_text = ['Day 0 00:00',
+#           'Day 0 12:00',
+#           'Day 1 00:00',
+#           'Day 1 12:00',
+#           'Day 2 00:00',
+#           'Day 2 12:00',
+#           'Day 3 00:00',
+#           'Day 3 12:00',
+#           'Day 4 00:00',
+#           'Day 4 12:00',
+#           'Day 5 00:00']
+
+#     y = y.flatten()
+    
+#     fig = go.Figure(go.Histogram2d(
+#             x = x,
+#             y = y,
+#             histnorm='percent',
+#             colorscale='turbo',
+#             autobinx=False,
+#             xbins= dict(size= .264),
+#             autobiny=False,
+#             ybins= dict(size = .264)
+#             ))
+
+#     fig.update_xaxes(tickangle=-90,
+#                     tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+#                     ticktext = t_text
+#                     )
+    
+#     # Update y-axis range if y_min and y_max are provided
+#     if y_min is not None and y_max is not None:
+#         fig.update_yaxes(range=[y_min, y_max])
+
+#     fig.update_layout(height=400, width=900, title_text=title,
+#                         xaxis_title=x_axis_title,
+#                         yaxis_title=y_axis_title)
+
+#     return fig
+
+
+def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Temperature (C)', 
+             y_min=None, y_max=None, n_bins_x=120, n_bins_y=60):
     """
     Creates a 2D histogram plot of temperature or velocity data over time.
 
     Parameters:
     x (np.array): Time values, repeated for each corresponding y value.
     y (np.array): Temperature or velocity values, flattened 2D array.
+    title (str): Title of the plot.
+    x_axis_title (str): Title for the x-axis.
+    y_axis_title (str): Title for the y-axis.
+    y_min (float): Optional minimum y-axis limit.
+    y_max (float): Optional maximum y-axis limit.
+    n_bins_x (int): Number of bins for x-axis.
+    n_bins_y (int): Number of bins for y-axis.
 
     Returns:
     plotly.graph_objects.Figure: A 2D histogram figure object.
-    
     """
     
     # Plot
-    t_text = ['Day 0 00:00',
-          'Day 0 12:00',
-          'Day 1 00:00',
-          'Day 1 12:00',
-          'Day 2 00:00',
-          'Day 2 12:00',
-          'Day 3 00:00',
-          'Day 3 12:00',
-          'Day 4 00:00',
-          'Day 4 12:00',
-          'Day 5 00:00']
+    t_text = ['Day 0 00:00', 'Day 0 12:00', 'Day 1 00:00', 'Day 1 12:00', 'Day 2 00:00',
+              'Day 2 12:00', 'Day 3 00:00', 'Day 3 12:00', 'Day 4 00:00', 'Day 4 12:00', 'Day 5 00:00']
 
     y = y.flatten()
+    
+    # Calculate bin ranges
+    x_range = [np.min(x), np.max(x)]
+    y_range = [np.min(y), np.max(y)] if y_min is None or y_max is None else [y_min, y_max]
     
     fig = go.Figure(go.Histogram2d(
             x = x,
@@ -41,24 +102,25 @@ def plot_fig(x, y, title = 'Placeholder', x_axis_title = 'Time', y_axis_title = 
             histnorm='percent',
             colorscale='turbo',
             autobinx=False,
-            xbins= dict(size= .264),
+            xbins=dict(start=x_range[0], end=x_range[1], size=(x_range[1]-x_range[0])/n_bins_x),
             autobiny=False,
-            ybins= dict(size = .264)
+            ybins=dict(start=y_range[0], end=y_range[1], size=(y_range[1]-y_range[0])/n_bins_y)
             ))
 
-
     fig.update_xaxes(tickangle=-90,
-                    tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+                    tickvals = np.linspace(1.5*np.pi, 11.5*np.pi, 11),
                     ticktext = t_text
                     )
+    
+    # Update y-axis range if y_min and y_max are provided
+    if y_min is not None and y_max is not None:
+        fig.update_yaxes(range=[y_min, y_max])
+
     fig.update_layout(height=400, width=900, title_text=title,
-                        xaxis_title=x_axis_title,
-                        yaxis_title=y_axis_title)
+                      xaxis_title=x_axis_title,
+                      yaxis_title=y_axis_title)
 
-    #fig_temp.show()
     return fig
-
-
 
 def temp_data(mu=20, delta=2, steps=10):
     high = mu + delta
@@ -228,9 +290,7 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
     return x_plot, y_plot
 
 
-
-
-def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, kappa=1, 
+def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, start_direction=90, kappa=2, 
                                       shift_prob=0.1, max_shift=90):
     """
     Generates synthetic wind direction data.
@@ -241,18 +301,17 @@ def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, kappa=1,
     kappa (float): Concentration parameter for von Mises distribution.
     shift_prob (float): Probability of a sudden shift in wind direction.
     max_shift (float): Maximum amount of sudden shift (in degrees).
+    start_direction (float): Starting wind direction (in degrees).
 
     Returns:
-    tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data.
+    tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data in degrees.
     """
     
-    # Convert max_shift from degrees to radians
-    max_shift_rad = max_shift * np.pi / 180
+    # Convert max_shift and start_direction from degrees to radians
+    max_shift_rad = np.radians(max_shift)
+    current_direction = np.radians(start_direction)
     
-    x = np.linspace(0, 2*np.pi, n_steps)
-    
-    # Initialize with a random direction
-    current_direction = np.random.uniform(0, 2*np.pi)
+    x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
     
     data = []
     for _ in range(n_steps):
@@ -267,8 +326,63 @@ def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, kappa=1,
         # Ensure all values are in [0, 2π)
         samples = samples % (2*np.pi)
         
-        data.append(samples)
+        # Convert samples to degrees
+        samples_deg = np.degrees(samples)
+        
+        data.append(samples_deg)
     
+    # Format data for output
+    x_plot = np.repeat(x, sample_size)
+    y_plot = np.array(data)
+    
+    return x_plot, y_plot
+
+
+def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1000, 
+                                        cloud_cover=0.5, cloud_cover_init_std=0.1, 
+                                        cloud_cover_uncertainty_growth=0.01):
+    """
+    Generates synthetic solar irradiance data based on specified requirements.
+
+    Parameters:
+    n_steps (int): Number of time steps.
+    sample_size (int): Number of samples per time step.
+    sol_irr (float): Maximum solar irradiance (W/m^2)
+    cloud_cover (float): Mean cloud cover (0-1)
+    cloud_cover_init_std (float): Initial standard deviation of cloud cover
+    cloud_cover_uncertainty_growth (float): Growth rate of cloud cover uncertainty
+
+    Returns:
+    tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of irradiance data.
+    """
+    x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
+    
+    # Base irradiance pattern (using sine function for day/night cycle)
+    base_irradiance = sol_irr * np.maximum(0, np.sin(x))
+    
+    # Generate probabilistic data with truncated normal distribution
+    data = []
+    for i in range(n_steps):
+        # Calculate cloud cover standard deviation
+        total_std = np.sqrt(cloud_cover_init_std**2 + (cloud_cover_uncertainty_growth * i)**2)
+        
+        # Generate cloud cover from truncated normal distribution
+        a, b = (0 - cloud_cover) / total_std, (1 - cloud_cover) / total_std
+        cloud_cover_sample = truncnorm.rvs(a, b, loc=cloud_cover, scale=total_std, size=sample_size)
+        cloud_cover_sample = np.clip(cloud_cover_sample, 0, 1)  # Ensure values are between 0 and 1
+
+        # Calculate irradiance
+        clear_sky_irr = base_irradiance[i]
+        direct = clear_sky_irr * (1 - cloud_cover_sample)
+        diffuse = clear_sky_irr * cloud_cover_sample * 0.5  # Assume 50% of blocked light becomes diffuse
+
+        # Combine components
+        total_irradiance = direct + diffuse
+
+        # Ensure non-negative values and cap at sol_irr
+        samples = np.clip(total_irradiance, 0, sol_irr)
+        data.append(samples)
+
     # Format data for output
     x_plot = np.repeat(x, sample_size)
     y_plot = np.array(data)
@@ -281,13 +395,67 @@ def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, kappa=1,
 
 
 
+# def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1000, 
+#                                         cloud_cover=0.5, cloud_cover_init_std=0.1, 
+#                                         cloud_cover_uncertainty_growth=0.01):
+#     """
+#     Generates synthetic solar irradiance data based on specified requirements.
+
+#     Parameters:
+#     n_steps (int): Number of time steps.
+#     sample_size (int): Number of samples per time step.
+#     sol_irr (float): Maximum solar irradiance (W/m^2)
+#     cloud_cover (float): Mean cloud cover (0-1)
+#     cloud_cover_init_std (float): Initial standard deviation of cloud cover
+#     cloud_cover_uncertainty_growth (float): Growth rate of cloud cover uncertainty
+
+#     Returns:
+#     tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of irradiance data.
+#     """
+#     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
+#     y_plot = np.zeros((n_steps, sample_size))
+
+#     # Define the irradiance percentage pattern
+#     irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0.97,
+#                     1.00, 0.98, 0.90, 0.77, 0.62, 0.47, 0.39, 0.00, 0.00, 0.00, 0.00, 0.00]
+#     irr_perc = np.tile(irr_perc_day, (n_steps // 24) + 1)[:n_steps]
+
+#     for i in range(n_steps):
+#         # Calculate cloud cover standard deviation
+#         total_std = np.sqrt(cloud_cover_init_std**2 + (cloud_cover_uncertainty_growth * i)**2)
+        
+#         # Generate cloud cover from truncated normal distribution
+#         a, b = (0 - cloud_cover) / total_std, (1 - cloud_cover) / total_std
+#         cloud_cover_sample = truncnorm.rvs(a, b, loc=cloud_cover, scale=total_std, size=sample_size)
+#         cloud_cover_sample = np.clip(cloud_cover_sample, 0, 1)  # Ensure values are between 0 and 1
+
+#         # Calculate clear sky irradiance
+#         clear_sky_irr = sol_irr * irr_perc[i]
+
+#         # Calculate direct and diffuse components
+#         direct = clear_sky_irr * (1 - cloud_cover_sample)
+#         diffuse = clear_sky_irr * cloud_cover_sample * 0.5  # Assume 50% of blocked light becomes diffuse
+
+#         # Combine components
+#         total_irradiance = direct + diffuse
+
+#         # Ensure non-negative values and cap at sol_irr
+#         y_plot[i] = np.clip(total_irradiance, 0, sol_irr)
+
+#     # Create x_plot by repeating x values
+#     x_plot = np.repeat(x, sample_size)
+
+#     return x_plot, y_plot
+
+
+
 
 def solar_irr_data(sol_irr = 1000, sol_perc = 0.5, decay = 1.0):
     x = np.linspace(1.5*np.pi, 11.5*3.14, 24*5)
     size = 1000
     dists = np.zeros((size, int(len(x))))
 
-    irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0-.97,\
+    irr_perc_day = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.39, 0.45, 0.59, 0.75, 0.88, 0.97,\
                     1.00, 0.98, 0.90, 0.77, 0.62, 0.47, 0.39, 0.00, 0.00, 0.00, 0.00, 0.00]
 
     irr_perc = np.array(irr_perc_day*5)

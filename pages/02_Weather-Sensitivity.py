@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import norm
-from utils import DLR, plot_fig, generate_synthetic_temp_truncated, generate_synthetic_wind_direction, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
+from utils import DLR, plot_fig, generate_synthetic_temp_truncated, generate_synthetic_wind_direction,generate_synthetic_solar_irradiance, temp_data, gen_normal, gen_uniform, wind_direction_data, solar_irr_data, velocity_temp__data
 
 st.title('Weather - Sensitivity')
 st.markdown('Experiemnt with the weather forecast variables on the left and observe how it changes the DLR forecast!')
@@ -56,9 +56,11 @@ temp_uncertainty_growth = st.sidebar.slider('Temperature Uncertainty Growth', 0.
 # Solar Irradiance
 with st.sidebar:
     st.write("Solar Irradiance Variables")
-sol_decay = st.sidebar.slider('Solar Temporal Decay', 0.0, 1.0, 1.0)
 sol_irr = st.sidebar.slider('Heat Flux (W/m^2)', 0, 2000, 1000)
-sol_perc = st.sidebar.slider('Percent Cloud Cover', 0.0, 1.0, 0.5)
+sol_cloud_cover = st.sidebar.slider('Solar Initial Cloud Cover', 0.0, 1.0, 0.5)
+sol_cloud_cover_std_dev = st.sidebar.slider('Cloud Cover Initial Standard Deviation', 0.1, 5.0, 1.0)
+sol_uncertainty_growth = st.sidebar.slider('Solar Uncertainty Growth', 0.0, 1.0, 0.01)
+#sol_perc = st.sidebar.slider('Percent Cloud Cover', 0.0, 1.0, 0.5)
 
 # Wind Velocity
 with st.sidebar:
@@ -73,9 +75,10 @@ with st.sidebar:
     st.write("Wind Direction Variables")
 #dir_decay = st.sidebar.slider('Wind Dir. Temporal Decay', 0.0, 1.0, 1.0)
 #dir_deg = st.sidebar.slider('Degrees From Transmission Line Axis', 0, 360, 45)
-dir_kappa = st.sidebar.slider('Kappa', 0.5, 10.0, 1.0)
+dir_init = st.sidebar.slider('Wind Direction (deg)', 0.0, 360.0, 90.0)
+dir_kappa = st.sidebar.slider('Kappa', 0.5, 20.0, 15.0)
 dir_shift_prob = st.sidebar.slider('Shift Probability', 0.0, 1.0, 0.1)
-dir_max_shift = st.sidebar.slider('Shif', 0.0, 180.0, 90.0)
+dir_max_shift = st.sidebar.slider('Max Shift (deg)', 0.0, 180.0, 15.0)
 
 
 
@@ -89,43 +92,53 @@ fig_temp = plot_fig(x=x_temp, y=y_temp, title = 'Temperature', y_axis_title = 'T
 
 
 
-### Solar Irradiance
-# Generate Data
-d_sol, t = solar_irr_data(sol_irr=sol_irr, sol_perc=sol_perc, decay=sol_decay)
-d_sol_new = d_sol.reshape(-1)
+# ### Solar Irradiance
+x_sol, y_sol = generate_synthetic_solar_irradiance(sol_irr=sol_irr,
+                                                   cloud_cover=sol_cloud_cover,
+                                                   cloud_cover_init_std=sol_cloud_cover_std_dev,
+                                                   cloud_cover_uncertainty_growth=sol_uncertainty_growth)  
 
-# Plot
-my_colorsc=[[0.0, 'rgb(231, 236, 239)'],
-            [0.1, 'rgb(70, 107, 227)'],
-            [0.2, 'rgb(62, 155, 254)'],
-            [0.3, 'rgb(24, 214, 203)'], 
-            [0.4, 'rgb(70, 247, 131)'],
-            [0.5, 'rgb(162, 252, 60)'],
-            [0.6, 'rgb(225, 220, 55)'], 
-            [0.7, 'rgb(253, 165, 49)'],
-            [0.8, 'rgb(239, 90, 17)'], 
-            [0.9, 'rgb(196, 37, 2)'],
-            [1, 'rgb(122, 4, 2)']]
+#x_sol, y_sol = generate_synthetic_solar_irradiance()
 
-fig_sol = go.Figure(go.Histogram2d(
-        x = t,
-        y = d_sol_new,
-        histnorm='percent',
-        colorscale='turbo',
-        autobinx=False,
-        xbins= dict(size= .264),
-        autobiny=False,
-        ybins= dict(size = 40)
-        ))
+fig_sol = plot_fig(x=x_sol, y=y_sol, title = 'Solar Irradiance',
+                   y_axis_title = 'Solar Irradiance (W/m^2)')
 
-fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance",
-                      xaxis_title='Time',
-                    yaxis_title='Heat Flux (W/m^2)',)
+# # Generate Data
+# d_sol, t = solar_irr_data(sol_irr=sol_irr, sol_perc=sol_perc, decay=sol_decay)
+# d_sol_new = d_sol.reshape(-1)
 
-fig_sol.update_xaxes(tickangle=-90,
-                  tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-                  ticktext = t_text
-                  )
+# # Plot
+# my_colorsc=[[0.0, 'rgb(231, 236, 239)'],
+#             [0.1, 'rgb(70, 107, 227)'],
+#             [0.2, 'rgb(62, 155, 254)'],
+#             [0.3, 'rgb(24, 214, 203)'], 
+#             [0.4, 'rgb(70, 247, 131)'],
+#             [0.5, 'rgb(162, 252, 60)'],
+#             [0.6, 'rgb(225, 220, 55)'], 
+#             [0.7, 'rgb(253, 165, 49)'],
+#             [0.8, 'rgb(239, 90, 17)'], 
+#             [0.9, 'rgb(196, 37, 2)'],
+#             [1, 'rgb(122, 4, 2)']]
+
+# fig_sol = go.Figure(go.Histogram2d(
+#         x = t,
+#         y = d_sol_new,
+#         histnorm='percent',
+#         colorscale='turbo',
+#         autobinx=False,
+#         xbins= dict(size= .264),
+#         autobiny=False,
+#         ybins= dict(size = 40)
+#         ))
+
+# fig_sol.update_layout(height=400, width=900, title_text="Solar Irradiance",
+#                       xaxis_title='Time',
+#                     yaxis_title='Heat Flux (W/m^2)',)
+
+# fig_sol.update_xaxes(tickangle=-90,
+#                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
+#                   ticktext = t_text
+#                   )
 
 
 
@@ -166,8 +179,8 @@ fig_vel = plot_fig(x=x_vel, y=y_vel, title = 'Wind Velocity', y_axis_title = 'Wi
 
 
 ### Wind Direction
-x_dir, y_dir = generate_synthetic_wind_direction(kappa = dir_kappa, shift_prob = dir_shift_prob, max_shift = dir_max_shift)
-fig_dir = plot_fig(x=x_vel, y=y_vel, title = 'Wind Direction', y_axis_title = 'Wind Direction (m/s)')
+x_dir, y_dir = generate_synthetic_wind_direction(start_direction=dir_init,kappa = dir_kappa, shift_prob = dir_shift_prob, max_shift = dir_max_shift)
+fig_dir = plot_fig(x=x_dir, y=y_dir, title = 'Wind Direction', y_axis_title = 'Wind Direction (m/s)')
 # # Genearte Data
 # dir_temp_decay = np.linspace(0.0, dir_decay, 5)
 # df_pol_0, d_0 = wind_direction_data(deg=dir_deg, kap=dir_kap, size=1000,perc_unif=dir_temp_decay[0])
