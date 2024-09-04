@@ -131,45 +131,6 @@ fig_DLR = plot_fig(x=x_DLR, y=y_DLR, title = 'DLR', y_axis_title = 'Rating (Amps
 fig_mc, stop_index = process_plot_timestep_stats(y_DLR, tolerance=0.01, consecutive_stable=50, time_step=time_step, early_stopping=early_stopping)
 
 
-
-# DLR_data = np.zeros((1000,120))
-
-# for i in range(y_vel.shape[1]):
-#     DLR_list = []
-#     for j in range(num_rand):
-#         rand_vel = np.random.choice(y_vel[:,i])
-#         rand_dir = np.random.choice(d_dir[:,i])
-#         rand_temp = np.random.choice(y_temp[:,i])
-#         rand_sol = np.random.choice(d_sol[:,i])
-#         _dlr = DLR(wind_speed=rand_vel, wind_angle=rand_dir, ambient_temp=rand_temp, eff_rad_heat_flux=rand_sol)
-#         DLR_temp = _dlr.ampacity()
-#         DLR_list.append(DLR_temp)
-#     DLR_data[:,i] = DLR_list
-
-
-# DLR_data_new = DLR_data.reshape(-1)
-
-# # Plot
-# fig_DLR = go.Figure(go.Histogram2d(
-#         x = t_new,
-#         y = DLR_data_new,
-#         histnorm='percent',
-#         colorscale='turbo',
-#         autobinx=False,
-#         xbins= dict(size= .264),
-#         #autobiny=False,
-#         #ybins= dict(size = .264)
-#         ))
-
-
-# fig_DLR.update_xaxes(tickangle=-90,
-#                   tickvals = np.linspace(1.5*np.pi, 11.5*3.14, 11),
-#                   ticktext = t_text, 
-#                   )
-# fig_DLR.update_layout(height=400, width=900, title_text="DLR Forecast",
-#                     xaxis_title='Time',
-#                     yaxis_title='Rating (Amps)',)
-
 # # Plot All Figures
 st.plotly_chart(fig_DLR)
 hide = """

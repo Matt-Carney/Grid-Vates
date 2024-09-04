@@ -11,7 +11,7 @@ from plotly.subplots import make_subplots
 
 
 def plot_fig(x, y, title='Placeholder', x_axis_title='Time', y_axis_title='Temperature (C)', 
-             y_min=None, y_max=None, n_bins_x=120, n_bins_y=60):
+             y_min=None, y_max=None, n_bins_x=120, n_bins_y=60, random_seed=123):
     """
     Creates a 2D histogram plot of temperature or velocity data over time.
 
@@ -72,7 +72,8 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
                                       initial_std_dev=1, 
                                       uncertainty_growth=0.01, 
                                       random_walk_scale=0.1,
-                                      type='temp'):
+                                      type='temp',
+                                      random_seed=123):
     
     """
     Generates synthetic temperature or velocity data with a truncated normal distribution.
@@ -125,6 +126,7 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
     tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data.
     """
 
+    np.random.seed(random_seed)
     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
     
     # Base temperature pattern
@@ -162,7 +164,7 @@ def generate_synthetic_temp_truncated(n_steps=120, mean=15,sample_size=1000,
 
 
 def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, start_direction=90, kappa=2, 
-                                      shift_prob=0.1, max_shift=90):
+                                      shift_prob=0.1, max_shift=90,random_seed=123):
     """
     Generates synthetic wind direction data.
 
@@ -178,6 +180,7 @@ def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, start_direc
     tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of generated data in degrees.
     """
     
+    np.random.seed(random_seed)
     # Convert max_shift and start_direction from degrees to radians
     max_shift_rad = np.radians(max_shift)
     current_direction = np.radians(start_direction)
@@ -211,7 +214,8 @@ def generate_synthetic_wind_direction(n_steps=120, sample_size=1000, start_direc
 
 def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1000, 
                                         cloud_cover=0.5, cloud_cover_init_std=0.1, 
-                                        cloud_cover_uncertainty_growth=0.01):
+                                        cloud_cover_uncertainty_growth=0.01,
+                                        random_seed=123):
     """
     Generates synthetic solar irradiance data based on specified requirements.
 
@@ -226,6 +230,7 @@ def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1
     Returns:
     tuple: (x_plot, y_plot) where x_plot is repeated time values and y_plot is a 2D array of irradiance data.
     """
+    np.random.seed(random_seed)
     x = np.linspace(1.5*np.pi, 11.5*np.pi, n_steps)
     
     # Base irradiance pattern (using sine function for day/night cycle)
@@ -259,7 +264,6 @@ def generate_synthetic_solar_irradiance(n_steps=120, sample_size=1000, sol_irr=1
     y_plot = np.array(data)
     
     return x_plot, y_plot
-
 
 
 def generate_DLR(y_temp, y_sol, y_vel, y_dir, n_samples=1000, n_steps=120):
@@ -305,7 +309,6 @@ def generate_DLR(y_temp, y_sol, y_vel, y_dir, n_samples=1000, n_steps=120):
 
     return x_plot, y_plot
 
-#process_plot_timestep_stats
 
 def process_plot_timestep_stats(y_plot, tolerance=0.01, consecutive_stable=10, time_step=0, early_stopping=True):
     """
@@ -497,7 +500,19 @@ class DLR:
         return I
         
 
+def temp_data(mu=20, delta=2, steps=10):
+    high = mu + delta
+    low = mu - delta
+    amp = (high-low)/2
+    ave = (high+low)/2
+    temp = np.sin(steps) * amp + ave
+    return temp
 
+def gen_uniform(low=0, high=1.0, size=10000):
+    return np.random.uniform(low=low, high=high, size=size)
+
+def gen_normal(mu=5, sigma=0.1, num=10000):
+    return np.random.normal(loc=mu, scale=sigma, size=num)
 #a = DLR(wind_speed=10, wind_angle=90, ambient_temp=20, eff_rad_heat_flux=1000)
 #a.ampacity()
 
