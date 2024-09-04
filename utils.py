@@ -380,7 +380,7 @@ def process_plot_timestep_stats(y_plot, tolerance=0.01, consecutive_stable=10, t
     # Update layout
     early_stop_status = "enabled" if early_stopping else "disabled"
     fig.update_layout(
-        title=f'Percentile Analysis of Y Plot Data for Time Step {time_step} (Early Stopping: {early_stop_status})',
+        title=f'Percentile Convergence for Timestep: {time_step} (Early Stopping: {early_stop_status})',
         xaxis_title='Number of Data Points',
         yaxis_title='Percentile Values',
         legend_title='Metrics',

@@ -10,7 +10,7 @@ st.set_page_config(page_title="Grid Vātēs")
 #st.set_page_config(layout="wide")
 
 st.title('Welcome to Grid Vātēs!')
-st.header('A Dynamic Line Rating Educational Sandbox')
+st.header('A Line Rating Educational Sandbox')
 #st.subheader('Vātēs is a Latin term used to refer to a prophet, seer, or poet;\
 #            someone believed to possess the ability to predict the future')
 
@@ -21,7 +21,7 @@ st.header('A Dynamic Line Rating Educational Sandbox')
 
 st.write('<font size="4">Vātēs is a Latin term used to refer to a prophet, seer, or poet; \
          someone believed to possess the ability to predict the future[1].\
-         The goal of this web app is to transform you into a DLR Vātēs!\
+         The goal of this web app is to transform you into a line rating Vātēs!\
          A summary of each tab, which can be accessed through the left pane, is listed below.</font>', unsafe_allow_html=True)
 
 st.write('')
@@ -30,10 +30,10 @@ st.markdown("Your one-stop-shop to learn about Dynamic Line Ratings and why they
 
 st.subheader('Weather - Sensitivity')
 st.markdown("This is the experimental sandbox ya'll have been asking for.\
-            As you may be aware, the DLR rating is influenced by ambient environmental conditions\
-            such as temperature, solar irradiance, wind speed and wind direction. Accordingly, a DLR forecast\
+            As you may be aware, the line ratings are influenced by ambient environmental conditions\
+            such as temperature, solar irradiance, wind speed and wind direction. Accordingly, a line rating forecast\
             is a 'forecast of forecasts' of said environmental conditions.\
-            Experiment with different environmental condition parameters and see how they affect the DLR forecast.")
+            Experiment with different environmental condition parameters and see how they affect the line rating forecast.")
 
 
 st.subheader('Weather - Scenarios')

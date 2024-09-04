@@ -9,27 +9,27 @@ from scipy.stats import norm
 from utils import DLR, plot_fig,generate_synthetic_temp_truncated, generate_synthetic_wind_direction,generate_synthetic_solar_irradiance, generate_DLR, process_plot_timestep_stats
 
 st.title('Weather - Sensitivity')
-st.markdown('Experiemnt with the weather forecast variables on the left and observe how it changes the DLR forecast!')
+st.markdown('Experiemnt with the weather variables on the left and observe how it changes the line rating forecast!')
 
-with st.expander("Here's what's going on..."):
-    st.markdown("For each of the weather forecasts (Temperature, Solar Irradiance, Wind Velocity, Wind Direction) there are\
-            two groups of variables to experiment with - temporal decay and the initial distribution parameters.\
-            At t = 0, 1,000 random samples are generated from an initial distribution determined by the initial distribution parameters.\
-            Additionally, at t = 0 an end-state distribution of 1,000 samples is also generated. For every time step n,\
-            an aggregate distribution is collated by selecting (n * temporal decay) samples of the end-state distribution and\
-            ((1000-n) * temporal decay) of the initial dribution. **Thus, a temporal decay of 0.0 will persist the initial distribution through the time space\
-            and a temporal decay of 1.0 will linearly transition completely from the initial distribution at t=0 to the end-state distribution\
-            at the end of day 5 (t=120).** A temporal decay of 0.5 will linearly transition from the initial at t=0 to 50% of the end state\
-            distribution at the end of day 5 (t=120). And so on...")
-    st.markdown("The initial and end state distributions are as follows:")
-    st.markdown("**Temperature** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
-    st.markdown("**Solar Irradiance** : Heat Flux is deterministic since it can b e calculated by the Earth's sphericity and orbital pattern.\
-                The maximum reduction of Solar Irradiance with 100% cloud cover is 0.75, thus the end-state distribution is Normal(ideal x cloud cover x 0.75)")
-    st.markdown("**Wind Velocity** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
-    st.markdown("**Wind Direction** : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
-                Note that a vonMises distribution is a circular normal distribution")
-    st.markdown("Finally, for each time step t, the DLR is determined by randomly sampling a temperature, solar irradiance,\
-                wind velocity and wind direction value 1,000 times and calculated using the IEEE 738-2006 methodology.")
+# with st.expander("Here's what's going on..."):
+#     st.markdown("For each of the weather forecasts (Temperature, Solar Irradiance, Wind Velocity, Wind Direction) there are\
+#             two groups of variables to experiment with - temporal decay and the initial distribution parameters.\
+#             At t = 0, 1,000 random samples are generated from an initial distribution determined by the initial distribution parameters.\
+#             Additionally, at t = 0 an end-state distribution of 1,000 samples is also generated. For every time step n,\
+#             an aggregate distribution is collated by selecting (n * temporal decay) samples of the end-state distribution and\
+#             ((1000-n) * temporal decay) of the initial dribution. **Thus, a temporal decay of 0.0 will persist the initial distribution through the time space\
+#             and a temporal decay of 1.0 will linearly transition completely from the initial distribution at t=0 to the end-state distribution\
+#             at the end of day 5 (t=120).** A temporal decay of 0.5 will linearly transition from the initial at t=0 to 50% of the end state\
+#             distribution at the end of day 5 (t=120). And so on...")
+#     st.markdown("The initial and end state distributions are as follows:")
+#     st.markdown("**Temperature** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
+#     st.markdown("**Solar Irradiance** : Heat Flux is deterministic since it can b e calculated by the Earth's sphericity and orbital pattern.\
+#                 The maximum reduction of Solar Irradiance with 100% cloud cover is 0.75, thus the end-state distribution is Normal(ideal x cloud cover x 0.75)")
+#     st.markdown("**Wind Velocity** : Normal(mean, std) -> Uniform(1%, 99% of Normal(mean, std))")
+#     st.markdown("**Wind Direction** : vonMises(mean, Kappa) -> Uniform(1%, 99% of vonMises(mean, Kappa))\
+#                 Note that a vonMises distribution is a circular normal distribution")
+#     st.markdown("Finally, for each time step t, the DLR is determined by randomly sampling a temperature, solar irradiance,\
+#                 wind velocity and wind direction value 1,000 times and calculated using the IEEE 738-2006 methodology.")
 
 t_text = ['Day 0 00:00',
           'Day 0 12:00',
@@ -80,10 +80,10 @@ dir_kappa = st.sidebar.slider('Kappa', 0.5, 20.0, 15.0)
 dir_shift_prob = st.sidebar.slider('Shift Probability', 0.0, 1.0, 0.1)
 dir_max_shift = st.sidebar.slider('Max Shift (deg)', 0.0, 180.0, 15.0)
 
-# Wind Direction
+# Line Rating Stats
 with st.sidebar:
-    st.write("DLR Stats Fig")
-time_step = st.sidebar.slider("Select Time Step", 0, 119, 0)
+    st.write("Line Rating Percentile Fig")
+time_step = st.sidebar.slider("Timestep", 0, 119, 0)
 early_stopping = st.sidebar.checkbox("Enable Early Stopping", value=True)
 
 ### Temperature
@@ -124,7 +124,7 @@ fig_dir = plot_fig(x=x_dir, y=y_dir, title = 'Wind Direction', y_axis_title = 'W
 
 ### DLR
 x_DLR, y_DLR = generate_DLR(y_temp=y_temp, y_sol=y_sol, y_vel=y_vel, y_dir=y_dir, n_samples=1000, n_steps=120)
-fig_DLR = plot_fig(x=x_DLR, y=y_DLR, title = 'DLR', y_axis_title = 'Rating (Amps)')
+fig_DLR = plot_fig(x=x_DLR, y=y_DLR, title = 'Line Rating', y_axis_title = 'Rating (Amps)')
 # num_rand = 1000
 
 ### DLR Monte Carlo
